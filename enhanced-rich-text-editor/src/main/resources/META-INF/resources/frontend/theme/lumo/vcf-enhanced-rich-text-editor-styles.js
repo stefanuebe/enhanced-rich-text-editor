@@ -6,6 +6,32 @@ import { color } from '@vaadin/vaadin-lumo-styles/color.js';
 import { typography } from '@vaadin/vaadin-lumo-styles/typography.js';
 import { css, registerStyles } from '@vaadin/vaadin-themable-mixin/vaadin-themable-mixin.js';
 
+const lightDomStyles = css`
+
+[slot="toolbar"] vaadin-button,
+vaadin-button[slot="toolbar"] {
+    width: var(--lumo-size-m);
+    height: var(--lumo-size-m);
+    border-radius: var(--lumo-border-radius);
+    color: var(--lumo-contrast-60pct);
+    margin: 2px 1px;
+    background: transparent;
+}
+
+[slot="toolbar"] vaadin-button:hover,
+vaadin-button[slot="toolbar"]:hover {
+    background-color: var(--lumo-contrast-5pct);
+    color: var(--lumo-contrast-80pct);
+    box-shadow: none;
+}
+
+[slot="toolbar"] vaadin-button[on],
+vaadin-button[slot="toolbar"][on] {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+  }
+`;
+
 const richTextEditor = css`
   :host {
           min-height: calc(var(--lumo-size-m) * 8);
@@ -218,6 +244,10 @@ const richTextEditor = css`
           margin: 0 calc(var(--lumo-space-m) / 2 - 1px);
         } 
 `;
+
+const styles = document.createElement("style");
+styles.innerHTML = lightDomStyles.cssText;
+document.head.append(styles);
 
 registerStyles('vcf-enhanced-rich-text-editor', [color, typography, richTextEditor], {
   moduleId: 'lumo-rich-text-editor',

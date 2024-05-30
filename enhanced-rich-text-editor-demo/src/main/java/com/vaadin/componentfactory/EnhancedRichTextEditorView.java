@@ -49,8 +49,6 @@ public class EnhancedRichTextEditorView extends DemoView {
         EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
         rte.setMaxHeight("200px");
 
-
-
         // end-source-example
         addCard("Basic Rich Text Editor", rte);
     }

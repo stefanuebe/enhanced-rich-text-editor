@@ -18,14 +18,15 @@ package com.vaadin.componentfactory;
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.function.ValueProvider;
 import org.jsoup.safety.Safelist;
 
 import com.vaadin.flow.component.button.Button;
@@ -99,6 +100,15 @@ public class EnhancedRichTextEditor
         });
     }
 
+    protected String getI18nOrDefault(ValueProvider<RichTextEditorI18n, String> getter, String defaultValue) {
+        RichTextEditorI18n i18n = getI18n();
+        if (i18n != null) {
+            return getter.apply(i18n);
+        }
+
+        return defaultValue;
+    }
+
     public Map<ToolbarButton, Boolean> getToolbarButtonsVisibility() {
         return toolbarButtonsVisibility;
     }
@@ -133,10 +143,44 @@ public class EnhancedRichTextEditor
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
-        Button tableButton = new Button(VaadinIcon.TABLE.create());
-        tableButton.addClickListener(event -> getElement().callJsFunction("_table_insert", 3, 3));
+        initToolbarTable();
+    }
 
-        addCustomToolbarButtons(tableButton);
+    private void initToolbarTable() {
+        IntegerField rows = createTableInsertNumberField(getI18nOrDefault(RichTextEditorI18n::getTableRows, "Rows"));
+        IntegerField cols = createTableInsertNumberField(getI18nOrDefault(RichTextEditorI18n::getTableCols, "Cols"));
+        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols);
+        insertLayout.addClassName("toolbar-table-insert");
+        insertLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        insertLayout.setSpacing(false);
+        insertLayout.setVisible(false);
+
+        ToolbarSwitch tableButton = new ToolbarSwitch(VaadinIcon.TABLE.create());
+        tableButton.addActiveChangedListener(event -> {
+            insertLayout.setVisible(event.isActive());
+        });
+
+        HorizontalLayout layout = new HorizontalLayout(tableButton, insertLayout);
+        layout.addClassName("toolbar-table");
+        addCustomToolbarComponents(layout);
+    }
+
+    private IntegerField createTableInsertNumberField(String placeholder) {
+        IntegerField field = new IntegerField();
+        field.setValue(1);
+        field.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                event.getSource().setValue(1);
+            }
+        });
+
+        field.setMin(1);
+        field.setMax(10);
+
+        field.setStepButtonsVisible(true);
+        field.setPlaceholder(placeholder);
+
+        return field;
     }
 
     /**
@@ -524,6 +568,9 @@ public class EnhancedRichTextEditor
         private String placeholderAppearanceLabel2;
         private String placeholderDialogTitle;
         private String clean;
+        private String table;
+        private String tableRows;
+        private String tableCols;
 
         /**
          * Gets the translated word for {@code undo}
@@ -1182,6 +1229,30 @@ public class EnhancedRichTextEditor
             return this;
         }
 
+        public String getTable() {
+            return table;
+        }
+
+        public void setTable(String table) {
+            this.table = table;
+        }
+
+        public String getTableRows() {
+            return tableRows;
+        }
+
+        public void setTableRows(String tableRows) {
+            this.tableRows = tableRows;
+        }
+
+        public String getTableCols() {
+            return tableCols;
+        }
+
+        public void setTableCols(String tableCols) {
+            this.tableCols = tableCols;
+        }
+
         /**
          * Gets the stringified values of the tooltips.
          *
@@ -1192,15 +1263,15 @@ public class EnhancedRichTextEditor
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
                     + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
                     + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + deindent 
-                    + ", " + indent + ", " + alignLeft + ", "+ alignCenter 
+                    + listOrdered + ", " + listBullet + ", " + deindent
+                    + ", " + indent + ", " + alignLeft + ", "+ alignCenter
                     + ", " + alignRight + ", " + alignJustify + ", " + image + ", "
                     + link + ", " + blockquote + ", " + codeBlock + ", "
                     + readonly + ", " + placeholder + ", "
                     + placeholderAppearance + ", " + placeholderComboBoxLabel
                     + ", " + placeholderAppearanceLabel1 + ", "
                     + placeholderAppearanceLabel2 + ", "
-                    + placeholderDialogTitle + ", " + clean + "]";
+                    + placeholderDialogTitle + ", " + clean + ", " + table+ ", " + tableRows+ ", " + tableCols+ "]";
         }
     }
 
