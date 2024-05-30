@@ -5,6 +5,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
 
 public class ToolbarSwitch extends Button {
@@ -23,6 +24,12 @@ public class ToolbarSwitch extends Button {
     public ToolbarSwitch(Component icon) {
         super(icon);
         init();
+    }
+
+    public ToolbarSwitch(VaadinIcon icon, VaadinIcon suffixIcon) {
+        super(icon.create());
+        init();
+        SlotUtil.addSuffixIcon(this, suffixIcon);
     }
 
     public ToolbarSwitch(String text, Component icon) {

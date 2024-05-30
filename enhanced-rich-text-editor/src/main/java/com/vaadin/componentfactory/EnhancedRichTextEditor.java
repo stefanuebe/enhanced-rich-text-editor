@@ -21,9 +21,11 @@ import java.io.Serializable;
 import java.util.*;
 
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -164,39 +166,27 @@ public class EnhancedRichTextEditor
         Button add = new Button(VaadinIcon.PLUS.create(), event -> tableInsertNew(rows.getValue(), cols.getValue()));
         add.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
 
-        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols, add);
-        insertLayout.addClassNames("toolbar-table-insert", "switchable-content");
+        HorizontalLayout insertLayout = new HorizontalLayout();
         insertLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        insertLayout.setVisible(false);
 
-        ToolbarSwitch tableInsertSwitch = new ToolbarSwitch(VaadinIcon.TABLE.create());
-        SlotUtil.addSuffixIcon(tableInsertSwitch, VaadinIcon.PLUS);
-
+        ToolbarSwitch tableInsertSwitch = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.PLUS);
         tableInsertSwitch.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertSwitchTooltip, "Show/Hide the \"add new table\" elements"));
-        tableInsertSwitch.addActiveChangedListener(event -> {
-            insertLayout.setVisible(event.isActive());
-        });
 
-        add.addClickListener(event -> tableInsertSwitch.setActive(false));
-
+        ToolbarPopup insertPopup = ToolbarPopup.horizontal(tableInsertSwitch, rows, new Span("x"), cols, add);
+        insertPopup.setFocusOnOpenTarget(rows);
+        add.addClickListener(event -> insertPopup.setOpened(false));
 
 
-        rows.setTabIndex(0);
-        cols.setTabIndex(1);
-
-        Button settings = new Button(VaadinIcon.GRID.create());
+        ToolbarSwitch settings = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.ASTERISK);
         settings.setEnabled(false);
 
-        Popup popup = new Popup();
-        popup.setTarget(settings.getElement());
-        popup.setFocusTrap(true);
-        popup.setRestoreFocusOnClose(true);
-        popup.add(new TextField("Hello"), new TextField("World"));
+        ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settings);
+        selectPopup.addItem("Hello", event -> Notification.show("Hello"));
+        selectPopup.addItem("World", event -> Notification.show("World"));
 
         addSelectedLineChangedListener(event -> settings.setEnabled(event.isTable()));
 
-        addCustomToolbarComponents(tableInsertSwitch, insertLayout, settings, popup);
-
+        addCustomToolbarComponents(tableInsertSwitch, settings);
     }
 
     public void tableInsertNew(int rows, int cols) {

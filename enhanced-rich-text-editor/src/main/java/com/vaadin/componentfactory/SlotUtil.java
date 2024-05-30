@@ -48,8 +48,12 @@ public class SlotUtil {
 
     public static void addSuffixIcon(Button button, VaadinIcon icon) {
         Icon i = icon.create();
-        i.getElement().setAttribute("slot", "suffix");
-        button.getElement().appendChild(i.getElement());
+        addSuffixIcon(button, i);
+    }
+
+    public static void addSuffixIcon(Button button, Component icon) {
+        icon.getElement().setAttribute("slot", "suffix");
+        button.getElement().appendChild(icon.getElement());
         button.addClassName("suffix-icon");
     }
 
