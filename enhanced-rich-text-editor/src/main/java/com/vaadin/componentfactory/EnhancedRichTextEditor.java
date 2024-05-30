@@ -29,6 +29,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 import org.jsoup.safety.Safelist;
 
 import com.vaadin.flow.component.button.Button;
@@ -160,10 +161,10 @@ public class EnhancedRichTextEditor
                 getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Amount of columns for the new table")
         );
 
-        Button insert = new Button(VaadinIcon.PLUS.create(), event -> tableInsertNew(rows.getValue(), cols.getValue()));
-        insert.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
+        Button add = new Button(VaadinIcon.PLUS.create(), event -> tableInsertNew(rows.getValue(), cols.getValue()));
+        add.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
 
-        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols, insert);
+        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols, add);
         insertLayout.addClassNames("toolbar-table-insert", "switchable-content");
         insertLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         insertLayout.setVisible(false);
@@ -176,15 +177,23 @@ public class EnhancedRichTextEditor
             insertLayout.setVisible(event.isActive());
         });
 
+        add.addClickListener(event -> tableInsertSwitch.setActive(false));
+
+
+
         rows.setTabIndex(0);
         cols.setTabIndex(1);
 
         Button settings = new Button(VaadinIcon.GRID.create());
+        settings.setEnabled(false);
+
         Popup popup = new Popup();
         popup.setTarget(settings.getElement());
         popup.setFocusTrap(true);
         popup.setRestoreFocusOnClose(true);
         popup.add(new TextField("Hello"), new TextField("World"));
+
+        addSelectedLineChangedListener(event -> settings.setEnabled(event.isTable()));
 
         addCustomToolbarComponents(tableInsertSwitch, insertLayout, settings, popup);
 
@@ -550,6 +559,10 @@ public class EnhancedRichTextEditor
     public void replaceStandardToolbarButtonIcon(ToolbarButton toolbarButton, Icon icon) {
    	 	Objects.requireNonNull(icon, "Icon can't be null");
         SlotUtil.replaceStandardButtonIcon(this, icon, toolbarButton.getButtonName());
+    }
+
+    public Registration addSelectedLineChangedListener(ComponentEventListener<SelectedLineChangedEvent> listener) {
+        return addListener(SelectedLineChangedEvent.class, listener);
     }
     
     /**
@@ -1343,5 +1356,48 @@ public class EnhancedRichTextEditor
           return String.join("", parts);
         }
         
+    }
+
+    @DomEvent("selected-line-changed")
+    public static class SelectedLineChangedEvent extends ComponentEvent<EnhancedRichTextEditor> {
+        private final String selectedTag;
+        private final String[] path;
+        private final boolean table;
+        private final boolean list;
+
+        public SelectedLineChangedEvent(
+                EnhancedRichTextEditor source,
+                boolean fromClient,
+                @EventData("event.detail.selected") String selectedTag,
+                @EventData("event.detail.path") JsonArray path,
+                @EventData("event.detail.isTable") boolean table,
+                @EventData("event.detail.isList") boolean list
+        ) {
+            super(source, fromClient);
+            this.selectedTag = selectedTag;
+            this.path = new String[0];
+            this.table = table;
+            this.list = list;
+        }
+
+        /**
+         * Returns the tag of the selected element.
+         * @return
+         */
+        public String getTag() {
+            return selectedTag;
+        }
+
+        public String[] getPath() {
+            return path;
+        }
+
+        public boolean isTable() {
+            return table;
+        }
+
+        public boolean isList() {
+            return list;
+        }
     }
 }

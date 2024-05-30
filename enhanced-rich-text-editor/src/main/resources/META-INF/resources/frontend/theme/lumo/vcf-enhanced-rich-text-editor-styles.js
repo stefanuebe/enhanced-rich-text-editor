@@ -16,6 +16,11 @@ const lightDomStyles = css`
       margin: 2px 1px;
       background: transparent;
   }
+  
+  [slot="toolbar"] vaadin-button[disabled],
+  vaadin-button[slot="toolbar"][disabled] {
+      color: var(--lumo-contrast-30pct);
+  }
 
   [slot="toolbar"] vaadin-button:hover,
   vaadin-button[slot="toolbar"]:hover {
