@@ -1,5 +1,5 @@
 import '../vendor/vaadin-quill.js';
-// import Delta from 'quill-delta';
+import Delta from 'quill-delta';
 import TableCell from './js/TableCellBlot.js';
 import TableRow from './js/TableRowBlot.js';
 import TableHistory from './js/TableHistory.js';

@@ -21,11 +21,13 @@ import java.io.Serializable;
 import java.util.*;
 
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
 import org.jsoup.safety.Safelist;
 
@@ -53,6 +55,8 @@ import elemental.json.impl.JreJsonFactory;
 @Tag("vcf-enhanced-rich-text-editor")
 @JsModule("./richTextEditorConnector-npm.js")
 @JavaScript("./richTextEditorConnector.js")
+@NpmPackage(value = "quill-delta", version = "5.1.0")
+@NpmPackage(value ="@vaadin/vaadin-license-checker", version = "^2.1.2")
 public class EnhancedRichTextEditor
         extends GeneratedEnhancedRichTextEditor<EnhancedRichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
@@ -142,30 +146,59 @@ public class EnhancedRichTextEditor
     public EnhancedRichTextEditor() {
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
-
         initToolbarTable();
     }
 
     private void initToolbarTable() {
-        IntegerField rows = createTableInsertNumberField(getI18nOrDefault(RichTextEditorI18n::getTableRows, "Rows"));
-        IntegerField cols = createTableInsertNumberField(getI18nOrDefault(RichTextEditorI18n::getTableCols, "Cols"));
-        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols);
-        insertLayout.addClassName("toolbar-table-insert");
+        // insert new table
+        IntegerField rows = createTableInsertNumberField(
+                getI18nOrDefault(RichTextEditorI18n::getTableInsertRows, "Rows"),
+                getI18nOrDefault(RichTextEditorI18n::getTableInsertRowsTooltip, "Amount of rows for the new table")
+        );
+        IntegerField cols = createTableInsertNumberField(
+                getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Columns"),
+                getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Amount of columns for the new table")
+        );
+
+        Button insert = new Button(VaadinIcon.PLUS.create(), event -> tableInsertNew(rows.getValue(), cols.getValue()));
+        insert.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
+
+        HorizontalLayout insertLayout = new HorizontalLayout(rows, new Span("x"), cols, insert);
+        insertLayout.addClassNames("toolbar-table-insert", "switchable-content");
         insertLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        insertLayout.setSpacing(false);
         insertLayout.setVisible(false);
 
-        ToolbarSwitch tableButton = new ToolbarSwitch(VaadinIcon.TABLE.create());
-        tableButton.addActiveChangedListener(event -> {
+        ToolbarSwitch tableInsertSwitch = new ToolbarSwitch(VaadinIcon.TABLE.create());
+        SlotUtil.addSuffixIcon(tableInsertSwitch, VaadinIcon.PLUS);
+
+        tableInsertSwitch.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertSwitchTooltip, "Show/Hide the \"add new table\" elements"));
+        tableInsertSwitch.addActiveChangedListener(event -> {
             insertLayout.setVisible(event.isActive());
         });
 
-        HorizontalLayout layout = new HorizontalLayout(tableButton, insertLayout);
-        layout.addClassName("toolbar-table");
-        addCustomToolbarComponents(layout);
+        rows.setTabIndex(0);
+        cols.setTabIndex(1);
+
+        Button settings = new Button(VaadinIcon.GRID.create());
+        Popup popup = new Popup();
+        popup.setTarget(settings.getElement());
+        popup.setFocusTrap(true);
+        popup.setRestoreFocusOnClose(true);
+        popup.add(new TextField("Hello"), new TextField("World"));
+
+        addCustomToolbarComponents(tableInsertSwitch, insertLayout, settings, popup);
+
     }
 
-    private IntegerField createTableInsertNumberField(String placeholder) {
+    public void tableInsertNew(int rows, int cols) {
+        if (rows <= 0 || cols <= 0) {
+            throw new IllegalArgumentException("Rows and cols must be greater 0");
+        }
+
+        getElement().callJsFunction("_table_insert", rows, cols);
+    }
+
+    private IntegerField createTableInsertNumberField(String placeholder, String tooltip) {
         IntegerField field = new IntegerField();
         field.setValue(1);
         field.addValueChangeListener(event -> {
@@ -179,6 +212,7 @@ public class EnhancedRichTextEditor
 
         field.setStepButtonsVisible(true);
         field.setPlaceholder(placeholder);
+        field.setTooltipText(tooltip);
 
         return field;
     }
@@ -435,19 +469,6 @@ public class EnhancedRichTextEditor
     }
 
     /**
-     * Adds the given toolbar buttons to the toolbar. These buttons will be append to the end and also automatically
-     * styled as toolbar buttons. If you do not want that styling to be applied, use
-     * {@link #addCustomToolbarComponents(Component...)} instead-
-     * @param buttons Custom buttons to be added
-     */
-    public void addCustomToolbarButtons(Button... buttons) {
-        for (Button button : buttons) {
-            button.getElement().setAttribute("part", "toolbar-button");
-            addCustomToolbarComponents(button);
-        }
-    }
-
-    /**
      * A convenience method to add multiple custom components at one call.
      *
      * @param components Custom components to be added.
@@ -459,8 +480,6 @@ public class EnhancedRichTextEditor
             SlotUtil.addComponent(this, component);
         }
     }
-
-
 
     /**
      * Get the custom button using its id. 
@@ -568,9 +587,12 @@ public class EnhancedRichTextEditor
         private String placeholderAppearanceLabel2;
         private String placeholderDialogTitle;
         private String clean;
-        private String table;
-        private String tableRows;
-        private String tableCols;
+        private String tableInsertSwitchTooltip;
+        private String tableInsertRows;
+        private String tableInsertCols;
+        private String tableInsertRowsTooltip;
+        private String tableInsertColsTooltip;
+        private String tableInsertAddButtonTooltip;
 
         /**
          * Gets the translated word for {@code undo}
@@ -1229,28 +1251,52 @@ public class EnhancedRichTextEditor
             return this;
         }
 
-        public String getTable() {
-            return table;
+        public String getTableInsertSwitchTooltip() {
+            return tableInsertSwitchTooltip;
         }
 
-        public void setTable(String table) {
-            this.table = table;
+        public void setTableInsertSwitchTooltip(String tableInsertSwitchTooltip) {
+            this.tableInsertSwitchTooltip = tableInsertSwitchTooltip;
         }
 
-        public String getTableRows() {
-            return tableRows;
+        public String getTableInsertRows() {
+            return tableInsertRows;
         }
 
-        public void setTableRows(String tableRows) {
-            this.tableRows = tableRows;
+        public void setTableInsertRows(String tableInsertRows) {
+            this.tableInsertRows = tableInsertRows;
         }
 
-        public String getTableCols() {
-            return tableCols;
+        public String getTableInsertCols() {
+            return tableInsertCols;
         }
 
-        public void setTableCols(String tableCols) {
-            this.tableCols = tableCols;
+        public void setTableInsertCols(String tableInsertCols) {
+            this.tableInsertCols = tableInsertCols;
+        }
+
+        public String getTableInsertRowsTooltip() {
+            return tableInsertRowsTooltip;
+        }
+
+        public void setTableInsertRowsTooltip(String tableInsertRowsTooltip) {
+            this.tableInsertRowsTooltip = tableInsertRowsTooltip;
+        }
+
+        public String getTableInsertColsTooltip() {
+            return tableInsertColsTooltip;
+        }
+
+        public void setTableInsertColsTooltip(String tableInsertColsTooltip) {
+            this.tableInsertColsTooltip = tableInsertColsTooltip;
+        }
+
+        public String getTableInsertAddButtonTooltip() {
+            return tableInsertAddButtonTooltip;
+        }
+
+        public void setTableInsertAddButtonTooltip(String tableInsertAddButtonTooltip) {
+            this.tableInsertAddButtonTooltip = tableInsertAddButtonTooltip;
         }
 
         /**
@@ -1261,17 +1307,17 @@ public class EnhancedRichTextEditor
         @Override
         public String toString() {
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
-                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
-                    + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + deindent
-                    + ", " + indent + ", " + alignLeft + ", "+ alignCenter
-                    + ", " + alignRight + ", " + alignJustify + ", " + image + ", "
-                    + link + ", " + blockquote + ", " + codeBlock + ", "
-                    + readonly + ", " + placeholder + ", "
-                    + placeholderAppearance + ", " + placeholderComboBoxLabel
-                    + ", " + placeholderAppearanceLabel1 + ", "
-                    + placeholderAppearanceLabel2 + ", "
-                    + placeholderDialogTitle + ", " + clean + ", " + table+ ", " + tableRows+ ", " + tableCols+ "]";
+                   + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
+                   + h3 + ", " + subscript + ", " + superscript + ", "
+                   + listOrdered + ", " + listBullet + ", " + deindent
+                   + ", " + indent + ", " + alignLeft + ", " + alignCenter
+                   + ", " + alignRight + ", " + alignJustify + ", " + image + ", "
+                   + link + ", " + blockquote + ", " + codeBlock + ", "
+                   + readonly + ", " + placeholder + ", "
+                   + placeholderAppearance + ", " + placeholderComboBoxLabel
+                   + ", " + placeholderAppearanceLabel1 + ", "
+                   + placeholderAppearanceLabel2 + ", "
+                   + placeholderDialogTitle + ", " + clean + ", " + tableInsertSwitchTooltip + ", " + tableInsertRows + ", " + tableInsertCols + "]";
         }
     }
 

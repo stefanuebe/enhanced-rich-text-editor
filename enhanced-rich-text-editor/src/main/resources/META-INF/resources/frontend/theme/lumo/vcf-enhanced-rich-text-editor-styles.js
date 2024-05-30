@@ -7,29 +7,69 @@ import { typography } from '@vaadin/vaadin-lumo-styles/typography.js';
 import { css, registerStyles } from '@vaadin/vaadin-themable-mixin/vaadin-themable-mixin.js';
 
 const lightDomStyles = css`
-
-[slot="toolbar"] vaadin-button,
-vaadin-button[slot="toolbar"] {
-    width: var(--lumo-size-m);
-    height: var(--lumo-size-m);
-    border-radius: var(--lumo-border-radius);
-    color: var(--lumo-contrast-60pct);
-    margin: 2px 1px;
-    background: transparent;
-}
-
-[slot="toolbar"] vaadin-button:hover,
-vaadin-button[slot="toolbar"]:hover {
-    background-color: var(--lumo-contrast-5pct);
-    color: var(--lumo-contrast-80pct);
-    box-shadow: none;
-}
-
-[slot="toolbar"] vaadin-button[on],
-vaadin-button[slot="toolbar"][on] {
-    background-color: var(--lumo-primary-color-10pct);
-    color: var(--lumo-primary-text-color);
+  [slot="toolbar"] vaadin-button,
+  vaadin-button[slot="toolbar"] {
+      width: var(--lumo-size-m);
+      height: var(--lumo-size-m);
+      border-radius: var(--lumo-border-radius);
+      color: var(--lumo-contrast-60pct);
+      margin: 2px 1px;
+      background: transparent;
   }
+
+  [slot="toolbar"] vaadin-button:hover,
+  vaadin-button[slot="toolbar"]:hover {
+      background-color: var(--lumo-contrast-5pct);
+      color: var(--lumo-contrast-80pct);
+      box-shadow: none;
+  }
+  
+  [slot="toolbar"] vaadin-button[on],
+  vaadin-button[slot="toolbar"][on] {
+      background-color: var(--lumo-primary-color-10pct);
+      color: var(--lumo-primary-text-color);
+  }
+  
+  .switchable-content[slot="toolbar"] {
+    gap: var(--lumo-space-xs);
+    padding: var(--lumo-space-xs);
+    background: var(--lumo-contrast-5pct);
+    height: var(--lumo-size-m);
+    margin-top: 2px;
+    border-radius: var(--lumo-border-radius-m);
+  }
+  
+  .switchable-content[slot="toolbar"] vaadin-integer-field {
+    --lumo-text-field-size: var(--lumo-size-s);
+    --lumo-font-size-m: 0.8rem;
+  }
+
+  .switchable-content[slot="toolbar"] vaadin-button {
+    width: var(--lumo-size-s);
+    height: var(--lumo-size-s);
+    --lumo-font-size-m: 0.8rem;
+    background-color: var(--lumo-contrast-20pct);
+  }
+  
+  .switchable-content[slot="toolbar"] vaadin-button:hover {
+    background-color: var(--lumo-contrast-30pct);
+  }
+  
+  vaadin-button.suffix-icon vaadin-icon[slot="suffix"] {
+    vertical-align: super;
+    font-size: var(--lumo-font-size-xs);
+  }
+
+  vaadin-button.suffix-icon[slot="toolbar"],
+  [slot="toolbar"] vaadin-button.suffix-icon {
+    width: var(--lumo-size-l);
+  }
+  
+  vaadin-button.suffix-icon[slot="toolbar"] vaadin-icon[slot="suffix"],
+  [slot="toolbar"] vaadin-button.suffix-icon vaadin-icon[slot="suffix"] {
+    padding-left: 0;
+  }
+  
 `;
 
 const richTextEditor = css`

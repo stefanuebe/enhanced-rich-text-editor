@@ -392,7 +392,7 @@ Quill.register('modules/table', TableModule);
             </span>
 
             <input id="fileInput" type="file" accept="image/png, image/gif, image/jpeg, image/bmp, image/x-icon" on-change="_uploadImage" />
-            
+
           </div>
 
           <div style="overflow: hidden; box-sizing: content-box; width: 100% !important; height: 15px !important; flex-shrink: 0; display: [[_rulerDisplayFlexWrapper(noRulers)]];">
@@ -1608,10 +1608,6 @@ Quill.register('modules/table', TableModule);
       this._updateHtmlValue();
     }
 
-    _table(e) {
-      TableTrick.table_handler('newtable_2_2', this._editor);
-    }
-
     _undo(e) {
       e.preventDefault();
       this._undoPlaceholderEvents();
@@ -1679,8 +1675,11 @@ Quill.register('modules/table', TableModule);
     }
 
     _table_insert(rows, cols) {
+      this._assureFocus();
       TableTrick.table_handler(`newtable_${rows}_${cols}`, this._editor);
     }
+
+
 
     _disabledChanged(disabled, readonly, editor) {
       if (disabled === undefined || readonly === undefined || editor === undefined) {
@@ -2249,6 +2248,12 @@ Quill.register('modules/table', TableModule);
       const licenseChecker = devModeCallback && devModeCallback['vaadin-license-checker'];
       if (typeof licenseChecker === 'function') {
         licenseChecker(VcfEnhancedRichTextEditor);
+      }
+    }
+
+    _assureFocus() {
+      if (!this._editor.hasFocus()) {
+        this._editor.focus();
       }
     }
   }

@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.dom.Element;
 
 public class SlotUtil {
@@ -43,6 +44,13 @@ public class SlotUtil {
             component.getElement().setAttribute("slot", SLOTNAME);
             target.getElement().appendChild(component.getElement());
         }
+    }
+
+    public static void addSuffixIcon(Button button, VaadinIcon icon) {
+        Icon i = icon.create();
+        i.getElement().setAttribute("slot", "suffix");
+        button.getElement().appendChild(i.getElement());
+        button.addClassName("suffix-icon");
     }
 
     private static void clearSlot(EnhancedRichTextEditor target, String slot) {
