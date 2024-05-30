@@ -6,12 +6,16 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +24,7 @@ import java.util.Map;
 /**
  * View for {@link EnhancedRichTextEditor} demo.
  */
+@RouteAlias("")
 @Route("enhanced-rich-text-editor")
 public class EnhancedRichTextEditorView extends DemoView {
 
@@ -43,6 +48,9 @@ public class EnhancedRichTextEditorView extends DemoView {
         // source-example-heading: Basic Rich Text Editor
         EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
         rte.setMaxHeight("200px");
+
+
+
         // end-source-example
         addCard("Basic Rich Text Editor", rte);
     }
@@ -345,4 +353,18 @@ public class EnhancedRichTextEditorView extends DemoView {
         // end-source-example
         addCard("Rich Text Editor with no rulers", rte);
     }
+
+
+    @Override
+    public void populateSources() {
+//        super.populateSources();
+
+        String javaFile = getClass().getSimpleName() + ".java";
+        String formattedPackageName = getClass().getPackage().getName()
+                .replaceAll("\\.", "/");
+        String resourcePath = "../test-classes/" + formattedPackageName + "/"
+                              + javaFile;
+
+    }
 }
+

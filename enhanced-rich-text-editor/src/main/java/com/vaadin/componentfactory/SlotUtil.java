@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
@@ -19,7 +20,23 @@ public class SlotUtil {
                 .filter(child -> slot.equals(child.getAttribute("slot")));
     }
 
+    /**
+     * Adds a button to the toolbar slot.
+     * @param target editor instance
+     * @param component button to add
+     * @deprecated use {@link #addComponent(EnhancedRichTextEditor, Component)} instead
+     */
+    @Deprecated
     public static void addButton(EnhancedRichTextEditor target, Button component) {
+        addComponent(target, component);
+    }
+
+    /**
+     * Adds a component to the toolbar slot.
+     * @param target editor instance
+     * @param component component to add
+     */
+    public static void addComponent(EnhancedRichTextEditor target, Component component) {
 //        clearSlot(target,SLOTNAME);
 
         if (component != null) {

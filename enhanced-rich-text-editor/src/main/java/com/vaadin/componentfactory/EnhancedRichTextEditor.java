@@ -23,15 +23,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
+import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import org.jsoup.safety.Safelist;
 
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -136,6 +132,11 @@ public class EnhancedRichTextEditor
     public EnhancedRichTextEditor() {
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+
+        Button tableButton = new Button(VaadinIcon.TABLE.create());
+        tableButton.addClickListener(event -> getElement().callJsFunction("_table_insert", 3, 3));
+
+        addCustomToolbarButtons(tableButton);
     }
 
     /**
@@ -364,24 +365,58 @@ public class EnhancedRichTextEditor
 
     /**
      * Add a custom button to the toolbar.
-     * 
+     * <p/>
+     * This method does NOT apply any toolbar styling to the button, but will keep it "Vaadin native".
+     *
      * @param button A custom button to be added, not null
+     * @deprecated use {@link #addCustomToolbarComponents(Component...)} instead
      */
+    @Deprecated
     public void addCustomButton(Button button) {
         Objects.requireNonNull(button, "Button can't be null");
-        SlotUtil.addButton(this, button);
+        addCustomToolbarComponents(button);
     }
 
     /**
      * A convenience method to add multiple custom buttons at one call.
-     *  
+     * <p/>
+     * This method does NOT apply any toolbar styling to the button, but will keep it "Vaadin native".
+     *
      * @param buttons Custom buttons to be added.
+     * @deprecated use {@link #addCustomToolbarComponents(Component...)} instead
      */
+    @Deprecated
     public void addCustomButtons(Button ...buttons) {
+        addCustomToolbarComponents(buttons);
+    }
+
+    /**
+     * Adds the given toolbar buttons to the toolbar. These buttons will be append to the end and also automatically
+     * styled as toolbar buttons. If you do not want that styling to be applied, use
+     * {@link #addCustomToolbarComponents(Component...)} instead-
+     * @param buttons Custom buttons to be added
+     */
+    public void addCustomToolbarButtons(Button... buttons) {
         for (Button button : buttons) {
-            addCustomButton(button);
+            button.getElement().setAttribute("part", "toolbar-button");
+            addCustomToolbarComponents(button);
         }
     }
+
+    /**
+     * A convenience method to add multiple custom components at one call.
+     *
+     * @param components Custom components to be added.
+     */
+    public void addCustomToolbarComponents(Component... components) {
+        Objects.requireNonNull(components);
+        for (Component component : components) {
+            Objects.requireNonNull(component);
+            SlotUtil.addComponent(this, component);
+        }
+    }
+
+
 
     /**
      * Get the custom button using its id. 
