@@ -20,8 +20,10 @@ package com.vaadin.componentfactory;
 import java.io.Serializable;
 import java.util.*;
 
+import com.vaadin.componentfactory.toolbar.ToolbarPopup;
+import com.vaadin.componentfactory.toolbar.ToolbarSelectPopup;
+import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
 import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -29,7 +31,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 import org.jsoup.safety.Safelist;
@@ -158,6 +159,7 @@ public class EnhancedRichTextEditor
                 getI18nOrDefault(RichTextEditorI18n::getTableInsertRows, "Rows"),
                 getI18nOrDefault(RichTextEditorI18n::getTableInsertRowsTooltip, "Amount of rows for the new table")
         );
+
         IntegerField cols = createTableInsertNumberField(
                 getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Columns"),
                 getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Amount of columns for the new table")
@@ -208,6 +210,7 @@ public class EnhancedRichTextEditor
 
         field.setMin(1);
         field.setMax(10);
+        field.setAutoselect(true);
 
         field.setStepButtonsVisible(true);
         field.setPlaceholder(placeholder);

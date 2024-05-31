@@ -1,10 +1,10 @@
-package com.vaadin.componentfactory;
+package com.vaadin.componentfactory.toolbar;
 
+import com.vaadin.componentfactory.SlotUtil;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
 

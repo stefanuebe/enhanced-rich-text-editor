@@ -1,5 +1,6 @@
-package com.vaadin.componentfactory;
+package com.vaadin.componentfactory.toolbar;
 
+import com.vaadin.componentfactory.Popup;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,7 +17,9 @@ public class ToolbarPopup extends Popup {
 
     public static ToolbarPopup horizontal(ToolbarSwitch toolbarSwitch, Component... components) {
         ToolbarPopup popup = new ToolbarPopup(toolbarSwitch);
-        popup.add(new HorizontalLayout(components));
+        HorizontalLayout layout = new HorizontalLayout(components);
+        layout.setPadding(true);
+        popup.add(layout);
         return popup;
     }
 
