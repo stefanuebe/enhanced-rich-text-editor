@@ -1,6 +1,7 @@
 import '../../vendor/vaadin-quill.js';
 import TableTrick from './TableTrick.js';
 import TableRow from './TableRowBlot.js';
+// import TableColGroupBlot from './TableColGroupBlot.js';
 import TableHistory from './TableHistory.js';
 import ContainBlot from './ContainBlot.js';
 import { hiddenBorderClassName } from './TableTrick.js';
@@ -14,13 +15,13 @@ class Table extends ContainBlot {
     let node = super.create(tagName);
     let atts = value.split('|');
     node.setAttribute('table_id', atts[0]);
-    if (atts[1] && JSON.parse(atts[1]) === true){
-      node.classList.add(hiddenBorderClassName)
+    if (typeof atts[1] === "string"){
+      node.classList.add(atts[1]);
     }
     return node
   }
 
-  format() {}
+  // we have no formats here, since the original addon is intended to build the table structure from TDs only
 
   optimize(context) {
     super.optimize(context);
@@ -105,6 +106,6 @@ Table.blotName = 'table';
 Table.tagName = 'table';
 Table.scope = Parchment.Scope.BLOCK_BLOT;
 Table.defaultChild = 'tr';
-Table.allowedChildren = [TableRow];
+Table.allowedChildren = [/*TableColGroupBlot, */TableRow];
 
 export default Table;

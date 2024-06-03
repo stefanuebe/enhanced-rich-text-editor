@@ -2,6 +2,8 @@ import '../vendor/vaadin-quill.js';
 import Delta from 'quill-delta';
 import TableCell from './js/TableCellBlot.js';
 import TableRow from './js/TableRowBlot.js';
+// import TableColGroup from './js/TableColGroupBlot.js';
+// import TableCol from './js/TableColBlot.js';
 import TableHistory from './js/TableHistory.js';
 import Table from './js/TableBlot.js';
 import Contain from './js/ContainBlot.js';
@@ -26,13 +28,15 @@ const nodeListToArray = collection => {
 
 Container.order = [
   'list', 'contain',   // Must be lower
-  'td', 'tr', 'table'  // Must be higher
+  'td', 'tr',/*'col','colgroup', */'table'  // Must be higher
 ];
 
 export default class TableModule {
   static register() {
     Quill.register(TableCell);
     Quill.register(TableRow);
+    // Quill.register(TableColGroup);
+    // Quill.register(TableCol);
     Quill.register(Table);
     Quill.register(Contain);
   }

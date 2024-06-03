@@ -16,6 +16,8 @@ class TableRow extends ContainBlot {
 
   format() {}
 
+  // we have no formats here, since the original addon is intended to build the table structure from TDs only
+
   optimize(context) {
     if (this.children.length === 0) {
       if (this.statics.defaultChild != null) {

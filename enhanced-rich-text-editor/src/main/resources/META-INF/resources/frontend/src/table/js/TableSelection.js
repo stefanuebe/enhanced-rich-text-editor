@@ -11,7 +11,7 @@ class TableSelection {
   static dblClickTimeout = null;
   static clickedCellTimeout = null;
   static preventMouseDown = true;
-  static cellSelectionOnClick = true;
+  static cellSelectionOnClick = false;
 
   static mouseDown(quill, e, inCellSelectionOnClick) {
     if (inCellSelectionOnClick !== undefined) { // we may have no options set for onClick

@@ -24,10 +24,7 @@ class TableCell extends ContainBlot {
       node.setAttribute('rowspan', atts[5]);
     }
     if(atts[6]){
-      node.setAttribute('hide_border', atts[6]);
-    }
-    if(atts[7]){
-      node.style.width = atts[7];
+      node.setAttribute('table-class', atts[6]);
     }
     return node;
   }
@@ -36,6 +33,15 @@ class TableCell extends ContainBlot {
 
   formats() {
     // We don't inherit from FormatBlot
+    let className = "";
+    const tr = this.domNode.parentNode;
+    if (tr && tr.children[0] === this.domNode) {
+      const table = tr.parentNode;
+      if (table && table.children[0] === tr) {
+        className = table.classList.toString();
+      }
+    }
+
     return {
       [this.statics.blotName]:
         [
@@ -45,10 +51,9 @@ class TableCell extends ContainBlot {
           this.domNode.getAttribute('merge_id'),
           this.domNode.getAttribute('colspan'),
           this.domNode.getAttribute('rowspan'),
-          this.domNode.getAttribute('hide_border'), //is the hide class present in the table.. index.js 116, TD cell matcher
-          this.domNode.getAttribute('width')
+          className,
         ].join('|')
-    }
+    };
   }
 
   optimize(context) {
@@ -64,8 +69,8 @@ class TableCell extends ContainBlot {
         // we will mark td position, put in table and replace mark
         let mark = Parchment.create('block');
         this.parent.insertBefore(mark, this.next);
-        let table = Parchment.create('table', this.domNode.getAttribute('table_id') + '|' + this.domNode.getAttribute('hide_border'));
-        this.domNode.removeAttribute('hide_border'); //no longer need this once we set it in the table, since blots created from cell to table. 
+        let table = Parchment.create('table', this.domNode.getAttribute('table_id') + '|' + this.domNode.getAttribute('table-class'));
+        this.domNode.removeAttribute('table-class'); //no longer need this once we set it in the table, since blots created from cell to table.
         let tr = Parchment.create('tr', this.domNode.getAttribute('row_id'));
         table.appendChild(tr);
         tr.appendChild(this);
