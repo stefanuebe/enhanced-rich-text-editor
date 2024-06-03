@@ -1,6 +1,3 @@
-import TableToolbar from './TableToolbar.js';
-import { hiddenBorderClassName } from './TableTrick.js';
-
 class TableSelection {
   static focusedCell = null;
   static isMouseDown = false;
@@ -151,11 +148,13 @@ class TableSelection {
     let tableTemplate = "";
     if (isInTable) {
       const selection1 = quill.getSelection();
+            if (selection1) {
       const leaf = quill.getLeaf(selection1.index)?.[0]?.domNode;
       if (leaf) {
         tableTemplate =  (leaf.tagName ? leaf : leaf.parentElement).closest("table")?.classList?.toString();
       }
     }
+        }
 
     this.dispatchSelectionEvent(host, isInTable != null, TableSelection.selectionStartElement != null, tableTemplate);
 
