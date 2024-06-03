@@ -1719,7 +1719,10 @@ Quill.register('modules/table', TableModule);
       TableTrick.table_handler(`newtable_${rows}_${cols}`, this._editor);
     }
 
-
+    _table_action(action) {
+      this._assureFocus();
+      TableTrick.table_handler(action, this._editor);
+    }
 
     _disabledChanged(disabled, readonly, editor) {
       if (disabled === undefined || readonly === undefined || editor === undefined) {

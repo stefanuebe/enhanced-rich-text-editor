@@ -1,7 +1,6 @@
 package com.vaadin.componentfactory;
 
 import com.steadystate.css.parser.CSSOMParser;
-import com.steadystate.css.parser.SACParserCSS3;
 import com.vaadin.componentfactory.EnhancedRichTextEditor.ToolbarButton;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Html;
@@ -18,12 +17,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import org.w3c.css.sac.InputSource;
 import org.w3c.dom.css.CSSRule;
-import org.w3c.dom.css.CSSStyleSheet;
 
-import java.io.IOException;
-import java.io.StringReader;
+import javax.swing.text.html.CSS;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,59 +51,48 @@ public class EnhancedRichTextEditorView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic Rich Text Editor
         EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
-        InputSource source = new InputSource(new StringReader("table.template1 {\n" +
-                                                                 "    color: gray;\n" +
-                                                                 "}\n" +
-                                                                 "\n" +
-                                                                 "table.template1 tr:nth-of-type(1) {\n" +
-                                                                 "    color: white;\n" +
-                                                                 "    font-size: 110%;\n" +
-                                                                 "    font-weight: bold;\n" +
-                                                                 "    background-color: #444;\n" +
-                                                                 "}\n" +
-                                                                 "\n" +
-                                                                 "table.template1 tr:nth-of-type(2) {\n" +
-                                                                 "    color: black;\n" +
-                                                                 "    font-weight: bold;\n" +
-                                                                 "    background-color: whitesmoke;\n" +
-                                                                 "}\n" +
-                                                                 "\n" +
-                                                                 "table.template1 tr td:nth-of-type(1) {\n" +
-                                                                 "    width: 50px;\n" +
-                                                                 "    background-color: whitesmoke;\n" +
-                                                                 "}" +
-                                                              "\n\ntable.template2 {\n" +
-                                                              "    color: green;\n" +
-                                                              "}\n" +
-                                                              "\n" +
-                                                              "table.template2 tr:nth-of-type(1) {\n" +
-                                                              "    color: gray;\n" +
-                                                              "    font-size: 110%;\n" +
-                                                              "    font-weight: bold;\n" +
-                                                              "    background-color: whitesmoke;\n" +
-                                                              "}\n" +
-                                                              "\n" +
-                                                              "\n" +
-                                                              "table.template2 tr td:nth-of-type(1) {\n" +
-                                                              "    width: 50px;\n" +
-                                                              "    background-color: whitesmoke;\n" +
-                                                              "}"));
 
-        CSSOMParser parser = new CSSOMParser(new SACParserCSS3());
-        try {
-            CSSStyleSheet sheet = parser.parseStyleSheet(source, null, null);
-            CSSRule item = sheet.getCssRules().item(0);
-            short type = item.getType();
-            String cssText = item.getCssText();
+        String styles = "table.template1 {\n" +
+                        "    color: gray;\n" +
+                        "}\n" +
+                        "\n" +
+                        "table.template1 > tr:nth-of-type(1) {\n" +
+                        "    color: white;\n" +
+                        "    font-size: 110%;\n" +
+                        "    font-weight: bold;\n" +
+                        "    background-color: #444;\n" +
+                        "}\n" +
+                        "\n" +
+                        "table.template1 > tr:nth-of-type(2) {\n" +
+                        "    color: black;\n" +
+                        "    font-weight: bold;\n" +
+                        "    background-color: whitesmoke;\n" +
+                        "}\n" +
+                        "\n" +
+                        "table.template1 > tr > td:nth-of-type(1) {\n" +
+                        "    width: 50px;\n" +
+                        "    background-color: whitesmoke;\n" +
+                        "}" +
+                        "\n\ntable.template2 {\n" +
+                        "    color: green;\n" +
+                        "}\n" +
+                        "\n" +
+                        "table.template2 > tr:nth-of-type(1) {\n" +
+                        "    color: gray;\n" +
+                        "    font-size: 110%;\n" +
+                        "    font-weight: bold;\n" +
+                        "    background-color: whitesmoke;\n" +
+                        "}\n" +
+                        "\n" +
+                        "\n" +
+                        "table.template2 > tr > td:nth-of-type(1) {\n" +
+                        "    width: 50px;\n" +
+                        "    background-color: whitesmoke;\n" +
+                        "}";
 
-            System.out.println(sheet.toString());
             rte.getElement().executeJs("const s = document.createElement('style');" +
                                        "s.innerHTML = $0;" +
-                                       "this.shadowRoot.append(s);", sheet.toString());
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                                       "this.shadowRoot.append(s);", styles);
 
         rte.setMaxHeight("200px");
 
@@ -118,16 +103,14 @@ public class EnhancedRichTextEditorView extends DemoView {
         rte.setValueChangeMode(ValueChangeMode.EAGER);
         addCard("Basic Rich Text Editor", rte, pre);
 
+        CSS css = new CSS();
+
         rte.addValueChangeListener(event -> pre.setText(event.getValue()));
 
-        rte.setValue("[{\"insert\":\"1\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|mbj24z2nkwo||||template1\"},\"insert\":\"\\n\"},{\"insert\":\"2\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|n9slf7tm49j||||\"},\"insert\":\"\\n\"},{\"insert\":\"3\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|0vcytjx5tesh||||\"},\"insert\":\"\\n\"},{\"insert\":\"4\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|9iqke2xds5b||||\"},\"insert\":\"\\n\"},{\"insert\":\"5\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|eu3h35wvnxb||||\"},\"insert\":\"\\n\"},{\"insert\":\"6\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|mvic5kzo8r||||\"},\"insert\":\"\\n\"},{\"insert\":\"\\n7\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|bumg3xr35i|u6g4t517wmo||||template2\"},\"insert\":\"\\n\"},{\"insert\":\"8\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|bumg3xr35i|7z66pnvr3t4||||\"},\"insert\":\"\\n\"},{\"insert\":\"9\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|bumg3xr35i|4wyomrrau6x||||\"},\"insert\":\"\\n\"},{\"insert\":\"10\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|9q3kf9xj3i|99u7etpood||||\"},\"insert\":\"\\n\"},{\"insert\":\"11\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|9q3kf9xj3i|60ehk2ytoq7||||\"},\"insert\":\"\\n\"},{\"insert\":\"12\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"2y44log8i57|9q3kf9xj3i|hzs3w8wj5jr||||\"},\"insert\":\"\\n\"},{\"insert\":\"\\n\"}]");
-
-//        rte.setValue("[{\"insert\":\"1\"},{\"attributes\":{\"td\":\"mfk15b8u9p|4mazfojoric|7del9bx3q6q||||\",\"tr\":\"|4mazfojoric|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"2\"},{\"attributes\":{\"td\":\"mfk15b8u9p|4mazfojoric|v1ld6ahuh8||||\",\"tr\":\"|4mazfojoric|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"3\"},{\"attributes\":{\"td\":\"mfk15b8u9p|4mazfojoric|bb6hqbwvwa||||\",\"tr\":\"|4mazfojoric|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"4\"},{\"attributes\":{\"td\":\"mfk15b8u9p|pfhhfog4ld8|y093qpk4dzf||||\",\"tr\":\"|pfhhfog4ld8|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"5\"},{\"attributes\":{\"td\":\"mfk15b8u9p|pfhhfog4ld8|0oe4i8cnhf2l||||\",\"tr\":\"|pfhhfog4ld8|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"6\"},{\"attributes\":{\"td\":\"mfk15b8u9p|pfhhfog4ld8|tbhzolhpr8f||||\",\"tr\":\"|pfhhfog4ld8|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"7\"},{\"attributes\":{\"td\":\"mfk15b8u9p|cjvun66minl|hgqkmw20az7||||\",\"tr\":\"|cjvun66minl|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"8\"},{\"attributes\":{\"td\":\"mfk15b8u9p|cjvun66minl|cu1h9z9qkh||||\",\"tr\":\"|cjvun66minl|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"9\"},{\"attributes\":{\"td\":\"mfk15b8u9p|cjvun66minl|buoyedwa2e||||\",\"tr\":\"|cjvun66minl|\",\"table\":\"mfk15b8u9p|\"},\"insert\":\"\\n\"},{\"insert\":\"\\n\"}]");
-
-
+        rte.setValue("[{\"insert\":\"1\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|mbj24z2nkwo||||template1\"},\"insert\":\"\\n\"},{\"insert\":\"2\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|n9slf7tm49j||1|2|\"},\"insert\":\"\\n\"},{\"insert\":\"4\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|n9slf7tm49j||1|2|\"},\"insert\":\"\\n\"},{\"insert\":\"3\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|0vcytjx5tesh||||\"},\"insert\":\"\\n\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|9iqke2xds5b|n9slf7tm49j|||\"},\"insert\":\"\\n\"},{\"insert\":\"5\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|eu3h35wvnxb||||\"},\"insert\":\"\\n\"},{\"insert\":\"6\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|mvic5kzo8r||||\"},\"insert\":\"\\n\"},{\"insert\":\"\\n\"}]");
 
     }
-    
+
     private void createEditorWithCustomShortcutsForStandardButtons() {
       // begin-source-example
       // source-example-heading: Basic Rich Text Editor with custom shortcuts for standard buttons

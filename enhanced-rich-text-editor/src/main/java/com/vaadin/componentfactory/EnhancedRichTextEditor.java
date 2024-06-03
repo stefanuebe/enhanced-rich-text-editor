@@ -24,6 +24,7 @@ import com.vaadin.componentfactory.toolbar.ToolbarPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSelectPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.safety.Safelist;
 
 import com.vaadin.flow.component.button.Button;
@@ -171,24 +173,36 @@ public class EnhancedRichTextEditor
         HorizontalLayout insertLayout = new HorizontalLayout();
         insertLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
-        ToolbarSwitch tableInsertSwitch = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.PLUS);
-        tableInsertSwitch.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertSwitchTooltip, "Show/Hide the \"add new table\" elements"));
+        ToolbarSwitch insertButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.PLUS);
+        insertButton.setTooltipText(getI18nOrDefault(RichTextEditorI18n::getTableInsertSwitchTooltip, "Show/Hide the \"add new table\" elements"));
 
-        ToolbarPopup insertPopup = ToolbarPopup.horizontal(tableInsertSwitch, rows, new Span("x"), cols, add);
+        ToolbarPopup insertPopup = ToolbarPopup.horizontal(insertButton, rows, new Span("x"), cols, add);
         insertPopup.setFocusOnOpenTarget(rows);
         add.addClickListener(event -> insertPopup.setOpened(false));
 
+        ToolbarSwitch settingsButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.ASTERISK);
+        settingsButton.setEnabled(false);
 
-        ToolbarSwitch settings = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.ASTERISK);
-        settings.setEnabled(false);
+        ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settingsButton);
+        selectPopup.addItem("Add row above", event -> tableAction("append-row-above"));
+        selectPopup.addItem("Add row below", event -> tableAction("append-row-below"));
 
-        ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settings);
-        selectPopup.addItem("Hello", event -> Notification.show("Hello"));
-        selectPopup.addItem("World", event -> Notification.show("World"));
+        List<MenuItem> cellActions = List.of(
+                selectPopup.addItem("Merge Cells", event -> tableAction("merge-selection"))
+        );
 
-        addSelectedLineChangedListener(event -> settings.setEnabled(event.isTable()));
+        selectPopup.addItem("Split Cells", event -> tableAction("split-cell"));
 
-        addCustomToolbarComponents(tableInsertSwitch, settings);
+
+        addTableSelectedListener(event -> {
+            settingsButton.setEnabled(event.isSelected());
+            boolean cellSelectionActive = event.isCellSelectionActive();
+            insertButton.setEnabled(!cellSelectionActive);
+            cellActions.forEach(menuItem -> menuItem.setEnabled(cellSelectionActive));
+            Notification.show("Template: " + event.getTemplate());
+        });
+
+        addCustomToolbarComponents(insertButton, settingsButton);
     }
 
     public void tableInsertNew(int rows, int cols) {
@@ -197,6 +211,10 @@ public class EnhancedRichTextEditor
         }
 
         getElement().callJsFunction("_table_insert", rows, cols);
+    }
+
+    protected void tableAction(String action) {
+        getElement().callJsFunction("_table_action", action);
     }
 
     private IntegerField createTableInsertNumberField(String placeholder, String tooltip) {
@@ -554,8 +572,8 @@ public class EnhancedRichTextEditor
         SlotUtil.replaceStandardButtonIcon(this, icon, toolbarButton.getButtonName());
     }
 
-    public Registration addSelectedLineChangedListener(ComponentEventListener<SelectedLineChangedEvent> listener) {
-        return addListener(SelectedLineChangedEvent.class, listener);
+    public Registration addTableSelectedListener(ComponentEventListener<TableSelectedEvent> listener) {
+        return addListener(TableSelectedEvent.class, listener);
     }
     
     /**
@@ -1351,46 +1369,47 @@ public class EnhancedRichTextEditor
         
     }
 
-    @DomEvent("selected-line-changed")
-    public static class SelectedLineChangedEvent extends ComponentEvent<EnhancedRichTextEditor> {
-        private final String selectedTag;
-        private final String[] path;
-        private final boolean table;
-        private final boolean list;
+    @DomEvent("table-selected")
+    public static class TableSelectedEvent extends ComponentEvent<EnhancedRichTextEditor> {
+        private final boolean selected;
 
-        public SelectedLineChangedEvent(
+        private final boolean cellSelectionActive;
+        private final String template;
+
+        public TableSelectedEvent(
                 EnhancedRichTextEditor source,
                 boolean fromClient,
-                @EventData("event.detail.selected") String selectedTag,
-                @EventData("event.detail.path") JsonArray path,
-                @EventData("event.detail.isTable") boolean table,
-                @EventData("event.detail.isList") boolean list
+                @EventData("event.detail.selected") boolean selected,
+                @EventData("event.detail.cellSelectionActive") boolean cellSelectionActive,
+                @EventData("event.detail.template") String template
         ) {
+
             super(source, fromClient);
-            this.selectedTag = selectedTag;
-            this.path = new String[0];
-            this.table = table;
-            this.list = list;
+
+            if(StringUtils.isNotBlank(template) && !template.matches("[A-Za-z0-9\\-]+")) {
+                throw new IllegalArgumentException("Illegal template name: " + template);
+            }
+
+            this.selected = selected;
+            this.cellSelectionActive = cellSelectionActive;
+            this.template = StringUtils.trimToNull(template);
+        }
+
+        public boolean isSelected() {
+            return selected;
+        }
+
+        public boolean isCellSelectionActive() {
+            return cellSelectionActive;
         }
 
         /**
-         * Returns the tag of the selected element.
-         * @return
+         * The template of the current selected table or null, if none is selected or the table has no template
+         * assigned.
+         * @return template
          */
-        public String getTag() {
-            return selectedTag;
-        }
-
-        public String[] getPath() {
-            return path;
-        }
-
-        public boolean isTable() {
-            return table;
-        }
-
-        public boolean isList() {
-            return list;
+        public String getTemplate() {
+            return template;
         }
     }
 }

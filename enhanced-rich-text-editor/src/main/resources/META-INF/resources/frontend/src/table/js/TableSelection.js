@@ -104,16 +104,22 @@ class TableSelection {
   }
 
   static selectionChange(quill, range = null, oldRange = null) {
+    const host = quill?.root?.getRootNode()?.host;
+    if (host?.tagName !== "VCF-ENHANCED-RICH-TEXT-EDITOR") {
+      throw new Error("invalid dom state", host);
+    }
+
     let isInTable = false;
     if (TableSelection.selectionStartElement || TableSelection.selectionEndElement) {
       // there is a table selection
       isInTable = true;
-      TableToolbar.enable(quill, ['split-cell', 'merge-selection', 'remove-selection', TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'] );
+      // TableToolbar.enable(quill, ['split-cell', 'merge-selection', 'remove-selection', TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'] );
       //disable selection based on hidden class
-      TableToolbar.disable(quill, !TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'); 
+      // TableToolbar.disable(quill, !TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border');
+
     } else {
       // Text selection
-      TableToolbar.disable(quill, ['split-cell', 'merge-selection', 'remove-selection']);
+      // TableToolbar.disable(quill, ['split-cell', 'merge-selection', 'remove-selection']);
       let selectionStartElement, selectionEndElement;
       if (range === null && oldRange !== null) {
         // There is a previous Quill selection but editor is no longer focused (selection-change event)
@@ -122,8 +128,8 @@ class TableSelection {
         selectionStartElement = startLeaf.parent.domNode;
         selectionEndElement = endLeaf.parent.domNode;
       } else {
-        // No Quill selection, use window.getSelection instead
-        const selection = window.getSelection();
+        // No Quill selection, use browser's  getSelection instead (chrome and firefox proof)
+        const selection = host.shadowRoot.getSelection ? host.shadowRoot.getSelection() : document.getSelection();
         selectionStartElement = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
         selectionEndElement = selection.focusNode ? (selection.focusNode.nodeType === Node.TEXT_NODE ? selection.focusNode.parentElement : selection.focusNode) : null;
       }
@@ -142,31 +148,54 @@ class TableSelection {
       } // no selection = not in table
     }
 
+    let tableTemplate = "";
+    if (isInTable) {
+      const selection1 = quill.getSelection();
+      const leaf = quill.getLeaf(selection1.index)?.[0]?.domNode;
+      if (leaf) {
+        tableTemplate =  (leaf.tagName ? leaf : leaf.parentElement).closest("table")?.classList?.toString();
+      }
+    }
+
+    this.dispatchSelectionEvent(host, isInTable != null, TableSelection.selectionStartElement != null, tableTemplate);
+
     if (!isInTable && quill.table.isInTable) {
-      // disable
       quill.table.isInTable = false;
-      TableToolbar.disableAll(quill);
-      TableToolbar.enable(quill, ['newtable_*', 'insert', 'undo', 'redo']);
+      // TableToolbar.disableAll(quill);
+      // TableToolbar.enable(quill, ['newtable_*', 'insert', 'undo', 'redo']);
+      //
+      // this.dispatchSelectionEvent(host, false, false);
     }
 
     if (isInTable && !quill.table.isInTable) {
-      // enable
       quill.table.isInTable = true;
-      TableToolbar.enable(quill, ['append-row*', 'append-col*', 'remove-cell', 'remove-row', 'remove-col', 'remove-table']);
+      // TableToolbar.enable(quill, ['append-row*', 'append-col*', 'remove-cell', 'remove-row', 'remove-col', 'remove-table']);
+      // this.dispatchSelectionEvent(host, true, true);
+
     }
 
-    if (isInTable && quill.table.isInTable){ //we are in a table, are we cursored?
-      let cursoredSelection = quill.getSelection();
+    // if (isInTable && quill.table.isInTable){ //we are in a table, are we cursored?
+      // let cursoredSelection = quill.getSelection();
+      //
+      // if (cursoredSelection) { //we are in table with a cursoredSelection
+      //   const [cursoredElement] = quill.getLine(cursoredSelection.index);
+      //   let cursoredTable = cursoredElement.domNode.closest('table');
+      //   if (cursoredTable){
+      //     // TableToolbar.enable(quill, [cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
+      //     // TableToolbar.disable(quill, [!cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
+      //   }
+      // }
+    // }
+  }
 
-      if (cursoredSelection) { //we are in table with a cursoredSelection
-        const [cursoredElement] = quill.getLine(cursoredSelection.index);
-        let cursoredTable = cursoredElement.domNode.closest('table');
-        if (cursoredTable){
-          TableToolbar.enable(quill, [cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
-          TableToolbar.disable(quill, [!cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);   
-        }
+  static dispatchSelectionEvent(eventDispatcher, tableSelected, cellSelectionActive, template) {
+    eventDispatcher.dispatchEvent(new CustomEvent("table-selected", {
+      detail: {
+        selected: tableSelected,
+        cellSelectionActive,
+        template
       }
-    }
+    }));
   }
 
   static getSelectionCoords() {

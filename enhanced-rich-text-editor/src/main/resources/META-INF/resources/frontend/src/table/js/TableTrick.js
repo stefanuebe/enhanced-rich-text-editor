@@ -56,18 +56,7 @@ export default class TableTrick {
   static insertTable(quill, col_count, row_count) {
     const table_id = TableTrick.random_id();
     const table = Parchment.create('table', table_id);
-    //
-    // const colgroupId = TableTrick.random_id();
-    // const colgroup = Parchment.create('colgroup', [table_id, colgroupId].join("|"));
-    // table.appendChild(colgroup);
-    //
-    // for (let ci = 0; ci < col_count; ci++) {
-    //   const colId = TableTrick.random_id();
-    //   const col = Parchment.create('col', [table_id, colgroupId, colId].join("|"));
-    //   colgroup.appendChild(col);
-    // }
-    //
-    //
+
     for (let ri = 0; ri < row_count; ri++) {
       const row_id = TableTrick.random_id();
       const tr = Parchment.create('tr', row_id);
