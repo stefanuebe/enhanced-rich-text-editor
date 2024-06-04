@@ -106,7 +106,7 @@ class TableSelection {
       throw new Error("invalid dom state", host);
     }
 
-    let isInTable = false;
+    let isInTable = TableSelection.selectionStartElement != null || TableSelection.selectionEndElement != null;
     // old original addon variant
     // if (TableSelection.selectionStartElement || TableSelection.selectionEndElement) {
     //   // there is a table selection
@@ -148,17 +148,27 @@ class TableSelection {
 
     // new variant
     let tableTemplate = "";
-    const selection1 = quill.getSelection();
-    if (selection1) {
-      const leaf = quill.getLeaf(selection1.index)?.[0]?.domNode;
-      if (leaf) {
-        let table = (leaf.tagName ? leaf : leaf.parentElement).closest("table");
-        isInTable = table != null;
-        tableTemplate = table?.classList?.toString();
+    if (TableSelection.selectionStartElement) {
+      // obtain table and class from "cell selection"
+      const table = TableSelection.selectionStartElement.closest("table");
+      tableTemplate = table?.classList?.toString();
+    } else {
+      // obtain table and class from normal text selection
+      const selection = quill.getSelection();
+      if (selection) {
+        const leaf = quill.getLeaf(selection.index)?.[0]?.domNode;
+        if (leaf) {
+          const table = (leaf.tagName ? leaf : leaf.parentElement).closest("table");
+
+          if (!isInTable) { // set flag if necessary
+            isInTable = table != null;
+          }
+          tableTemplate = table?.classList?.toString();
+        }
       }
     }
 
-    this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement !== null, tableTemplate);
+    this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement != null, tableTemplate);
 
     if (!isInTable && quill.table.isInTable) {
       quill.table.isInTable = false;
