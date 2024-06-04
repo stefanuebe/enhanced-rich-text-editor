@@ -7,6 +7,7 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.icon.Icon;
@@ -34,6 +35,8 @@ public class EnhancedRichTextEditorView extends DemoView {
 
     @Override
     protected void initView() {
+        EnhancedRichTextEditorTables.init();
+
         createDefaultEditor();
 //        createEditorWithTabstops();
 //        createGetValue();
@@ -51,6 +54,7 @@ public class EnhancedRichTextEditorView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic Rich Text Editor
         EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
+        EnhancedRichTextEditorTables.initToolbarTable(rte);
 
         String styles = "table.template1 {\n" +
                         "    color: gray;\n" +

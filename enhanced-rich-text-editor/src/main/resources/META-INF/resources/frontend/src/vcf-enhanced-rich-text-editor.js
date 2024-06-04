@@ -24,15 +24,11 @@ import './vcf-enhanced-rich-text-editor-styles';
 import './vcf-enhanced-rich-text-editor-toolbar-styles';
 import './vcf-enhanced-rich-text-editor-extra-icons';
 import { ReadOnlyBlot, LinePartBlot, TabBlot, PreTabBlot, TabsContBlot, PlaceholderBlot } from './vcf-enhanced-rich-text-editor-blots';
-import TableModule from './table/index.js';
-import TableTrick from './table/js/TableTrick';
 
 const Quill = window.Quill;
 const Inline = Quill.import('blots/inline');
 
 Inline.order.push(PlaceholderBlot.blotName, ReadOnlyBlot.blotName, LinePartBlot.blotName, TabBlot.blotName, PreTabBlot.blotName);
-
-Quill.register('modules/table', TableModule);
 
 (function() {
   'use strict';
@@ -795,15 +791,17 @@ Quill.register('modules/table', TableModule);
 
       this._addToolbarListeners();
 
-      this._editor = new Quill(editor, {
+      let options = {
         modules: {
           toolbar: toolbarConfig,
-          table: true,
-          keyboard: {
-            bindings: TableModule.keyBindings
-          }
         }
-      });
+      };
+
+      if (window.Vaadin.Flow._enhanced_rich_text_editor.extendRteOptions) {
+        options = window.Vaadin.Flow._enhanced_rich_text_editor.extendRteOptions(options);
+      }
+
+      this._editor = new Quill(editor, options);
       const _editor = this._editor;
 
       this._editor.on('text-change', function(delta, oldDelta, source) {
@@ -891,46 +889,6 @@ Quill.register('modules/table', TableModule);
             if (this._inPlaceholder === false) {
               this.dispatchEvent(new CustomEvent('placeholder-leave', { bubbles: true }));
               delete this._inPlaceholder;
-            }
-
-            let detailObject = {
-              selected: undefined,
-              path: [],
-              isTable: false,
-              isList: false
-            };
-
-            if (opt) {
-              let lineElement = this._editor.getLine(opt.index)[0];
-              if (lineElement) {
-                let current = lineElement.domNode;
-
-                if (this.__lastSelectedDomNode !== current) {
-                  this.__lastSelectedDomNode = current;
-                  detailObject.selected = current.tagName.toLowerCase();
-
-                  while(current && current !== this._editor.root) {
-                    let tagName = current.tagName;
-                    if (tagName === "TABLE") {
-                      detailObject.isTable = true;
-                    } else if (tagName === "UL" || tagName === "OL") {
-                      detailObject.isList = true;
-                    }
-
-                    detailObject.path.push(tagName.toLowerCase());
-                    current = current.parentNode;
-                  }
-
-                  let event = new CustomEvent("selected-line-changed", {
-                    detail: detailObject
-                  });
-                  this.dispatchEvent(event);
-                }
-              }
-            } else {
-              delete this.__lastSelectedDomNode;
-              let event = new CustomEvent("selected-line-changed", {detail: detailObject});
-              this.dispatchEvent(event);
             }
           });
         }
@@ -1261,29 +1219,6 @@ Quill.register('modules/table', TableModule);
           }
         });
       };
-
-      // /* create table actions */
-      // const tableItems = {};
-      // for (let r = 1; r <= 5; r++) {
-      //   for (let c = 1; c <= 5; c++) {
-      //     const key = 'newtable_' + r + '_' + c;
-      //     tableItems[key] = key;
-      //   }
-      // }
-      //
-      // const dropDown = new QuillToolbarDropDown(this._editor, this.shadowRoot, {
-      //   icon: 'vcf-erte-extra-icons:table-icon',
-      //   label: 'hello',
-      //   items: tableItems,
-      //   displayItemsType: "grid"
-      // });
-      //
-      // dropDown.onSelect = (label, value, quill) => {
-      //   quill.root.focus();
-      //   TableTrick.table_handler(value, quill);
-      // }
-      //
-      // dropDown.attach();
     }
 
     _patchKeyboard() {
@@ -1712,16 +1647,6 @@ Quill.register('modules/table', TableModule);
         };
         reader.readAsDataURL(fileInput.files[0]);
       }
-    }
-
-    _table_insert(rows, cols) {
-      this._assureFocus();
-      TableTrick.table_handler(`newtable_${rows}_${cols}`, this._editor);
-    }
-
-    _table_action(action) {
-      this._assureFocus();
-      TableTrick.table_handler(action, this._editor);
     }
 
     _disabledChanged(disabled, readonly, editor) {
@@ -2291,12 +2216,6 @@ Quill.register('modules/table', TableModule);
       const licenseChecker = devModeCallback && devModeCallback['vaadin-license-checker'];
       if (typeof licenseChecker === 'function') {
         licenseChecker(VcfEnhancedRichTextEditor);
-      }
-    }
-
-    _assureFocus() {
-      if (!this._editor.hasFocus()) {
-        this._editor.focus();
       }
     }
   }

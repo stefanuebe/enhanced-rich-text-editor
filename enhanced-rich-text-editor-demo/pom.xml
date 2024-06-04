@@ -83,14 +83,11 @@
             <artifactId>enhanced-rich-text-editor</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>net.sourceforge.cssparser</groupId>
-            <artifactId>cssparser</artifactId>
-            <version>0.9.30</version>
+            <groupId>com.vaadin.componentfactory</groupId>
+            <artifactId>enhanced-rich-text-editor-tables</artifactId>
+            <version>${project.version}</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
