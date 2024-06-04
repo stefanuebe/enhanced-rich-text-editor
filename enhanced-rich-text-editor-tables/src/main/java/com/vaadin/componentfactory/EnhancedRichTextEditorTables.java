@@ -69,7 +69,6 @@ public class EnhancedRichTextEditorTables {
             boolean cellSelectionActive = event.isCellSelectionActive();
             insertButton.setEnabled(!cellSelectionActive);
             cellActions.forEach(menuItem -> menuItem.setEnabled(cellSelectionActive));
-            Notification.show("Template: " + event.getTemplate());
         });
 
         rte.addCustomToolbarComponents(insertButton, settingsButton);

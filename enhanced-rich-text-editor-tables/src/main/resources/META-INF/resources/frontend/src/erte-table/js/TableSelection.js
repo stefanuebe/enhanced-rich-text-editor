@@ -19,7 +19,7 @@ class TableSelection {
       // do nothing with center or right click
       return;
     }
-    
+
     // reset cell selection, even if it is cursor click, keeps everyone in check
     TableSelection.previousSelection = [TableSelection.selectionStartElement, TableSelection.selectionEndElement];
     TableSelection.selectionStartElement = TableSelection.selectionEndElement = null;
@@ -34,26 +34,26 @@ class TableSelection {
         TableSelection.focusedCell = null;
         return;
       }
-  
+
       if ((!TableSelection.preventMouseDown && targetCell === TableSelection.clickedCellTimeout) || TableSelection.focusedCell === targetCell) {
         // default mouse down event when multiple click in less than 500ms in the same cell or if the cell is already focused
         TableSelection.focusedCell = targetCell;
         return;
       }
-  
+
       // single mouse left click = start selection
       e.preventDefault();
       TableSelection.focusedCell = null;
-  
+
       clearTimeout(TableSelection.dblClickTimeout);
       TableSelection.dblClickTimeout = setTimeout(() => {
         TableSelection.preventMouseDown = true;
         TableSelection.clickedCellTimeout = null;
       }, 500);
       TableSelection.preventMouseDown = false;
-  
+
       TableSelection.selectionStartElement = TableSelection.clickedCellTimeout = targetCell;
-  
+
       if (TableSelection.selectionStartElement) {
         TableSelection.selectionStartElement.classList.add('ql-cell-selected');
       }
@@ -66,9 +66,9 @@ class TableSelection {
       TableSelection.selectionEndElement = TableSelection.getTargetCell(e);
       // Update selection if: mouse button is down, selection changed, start and end element exist and are in the same table
       if (
-        TableSelection.selectionEndElement &&
-        TableSelection.selectionEndElement !== previousSelectionEndElement &&
-        TableSelection.selectionStartElement.closest('table') === TableSelection.selectionEndElement.closest('table')
+          TableSelection.selectionEndElement &&
+          TableSelection.selectionEndElement !== previousSelectionEndElement &&
+          TableSelection.selectionStartElement.closest('table') === TableSelection.selectionEndElement.closest('table')
       ) {
         TableSelection.resetSelection();
 
@@ -93,8 +93,8 @@ class TableSelection {
     }
 
     if (
-      TableSelection.previousSelection[0] !== TableSelection.selectionStartElement &&
-      TableSelection.previousSelection[1] !== TableSelection.selectionEndElement
+        TableSelection.previousSelection[0] !== TableSelection.selectionStartElement &&
+        TableSelection.previousSelection[1] !== TableSelection.selectionEndElement
     ) {
       TableSelection.selectionChange(quill);
     }
@@ -107,56 +107,58 @@ class TableSelection {
     }
 
     let isInTable = false;
-    if (TableSelection.selectionStartElement || TableSelection.selectionEndElement) {
-      // there is a table selection
-      isInTable = true;
-      // TableToolbar.enable(quill, ['split-cell', 'merge-selection', 'remove-selection', TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'] );
-      //disable selection based on hidden class
-      // TableToolbar.disable(quill, !TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border');
+    // old original addon variant
+    // if (TableSelection.selectionStartElement || TableSelection.selectionEndElement) {
+    //   // there is a table selection
+    //   isInTable = true;
+    //   // TableToolbar.enable(quill, ['split-cell', 'merge-selection', 'remove-selection', TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'] );
+    //   //disable selection based on hidden class
+    //   // TableToolbar.disable(quill, !TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border');
+    //
+    // } else {
+    //   // Text selection
+    //   // TableToolbar.disable(quill, ['split-cell', 'merge-selection', 'remove-selection']);
+    //   let selectionStartElement, selectionEndElement;
+    //   if (range === null && oldRange !== null) {
+    //     // There is a previous Quill selection but editor is no longer focused (selection-change event)
+    //     const [startLeaf] = quill.getLeaf(oldRange.index);
+    //     const [endLeaf] = quill.getLeaf(oldRange.index + oldRange.length);
+    //     selectionStartElement = startLeaf.parent.domNode;
+    //     selectionEndElement = endLeaf.parent.domNode;
+    //   } else {
+    //     // No Quill selection, use browser's  getSelection instead (chrome and firefox proof)
+    //     const selection = host.shadowRoot.getSelection ? host.shadowRoot.getSelection() : document.getSelection();
+    //     selectionStartElement = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
+    //     selectionEndElement = selection.focusNode ? (selection.focusNode.nodeType === Node.TEXT_NODE ? selection.focusNode.parentElement : selection.focusNode) : null;
+    //   }
+    //
+    //   if (selectionStartElement && selectionEndElement) {
+    //     // there is a text selection
+    //     let closestTable = selectionStartElement.closest('table');
+    //     if (closestTable && closestTable.closest('.ql-editor')) {
+    //       if (selectionEndElement !== selectionStartElement) {
+    //         closestTable = selectionEndElement.closest('table');
+    //         isInTable = closestTable && closestTable.closest('.ql-editor');
+    //       } else {
+    //         isInTable = true;
+    //       }
+    //     }
+    //   } // no selection = not in table
+    // }
 
-    } else {
-      // Text selection
-      // TableToolbar.disable(quill, ['split-cell', 'merge-selection', 'remove-selection']);
-      let selectionStartElement, selectionEndElement;
-      if (range === null && oldRange !== null) {
-        // There is a previous Quill selection but editor is no longer focused (selection-change event)
-        const [startLeaf] = quill.getLeaf(oldRange.index);
-        const [endLeaf] = quill.getLeaf(oldRange.index + oldRange.length);
-        selectionStartElement = startLeaf.parent.domNode;
-        selectionEndElement = endLeaf.parent.domNode;
-      } else {
-        // No Quill selection, use browser's  getSelection instead (chrome and firefox proof)
-        const selection = host.shadowRoot.getSelection ? host.shadowRoot.getSelection() : document.getSelection();
-        selectionStartElement = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
-        selectionEndElement = selection.focusNode ? (selection.focusNode.nodeType === Node.TEXT_NODE ? selection.focusNode.parentElement : selection.focusNode) : null;
-      }
-
-      if (selectionStartElement && selectionEndElement) {
-        // there is a text selection
-        let closestTable = selectionStartElement.closest('table');
-        if (closestTable && closestTable.closest('.ql-editor')) {
-          if (selectionEndElement !== selectionStartElement) {
-            closestTable = selectionEndElement.closest('table');
-            isInTable = closestTable && closestTable.closest('.ql-editor');
-          } else {
-            isInTable = true;
-          }
-        }
-      } // no selection = not in table
-    }
-
+    // new variant
     let tableTemplate = "";
-    if (isInTable) {
-      const selection1 = quill.getSelection();
-            if (selection1) {
+    const selection1 = quill.getSelection();
+    if (selection1) {
       const leaf = quill.getLeaf(selection1.index)?.[0]?.domNode;
       if (leaf) {
-        tableTemplate =  (leaf.tagName ? leaf : leaf.parentElement).closest("table")?.classList?.toString();
+        let table = (leaf.tagName ? leaf : leaf.parentElement).closest("table");
+        isInTable = table != null;
+        tableTemplate = table?.classList?.toString();
       }
     }
-        }
 
-    this.dispatchSelectionEvent(host, isInTable != null, TableSelection.selectionStartElement != null, tableTemplate);
+    this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement !== null, tableTemplate);
 
     if (!isInTable && quill.table.isInTable) {
       quill.table.isInTable = false;
@@ -174,16 +176,16 @@ class TableSelection {
     }
 
     // if (isInTable && quill.table.isInTable){ //we are in a table, are we cursored?
-      // let cursoredSelection = quill.getSelection();
-      //
-      // if (cursoredSelection) { //we are in table with a cursoredSelection
-      //   const [cursoredElement] = quill.getLine(cursoredSelection.index);
-      //   let cursoredTable = cursoredElement.domNode.closest('table');
-      //   if (cursoredTable){
-      //     // TableToolbar.enable(quill, [cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
-      //     // TableToolbar.disable(quill, [!cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
-      //   }
-      // }
+    // let cursoredSelection = quill.getSelection();
+    //
+    // if (cursoredSelection) { //we are in table with a cursoredSelection
+    //   const [cursoredElement] = quill.getLine(cursoredSelection.index);
+    //   let cursoredTable = cursoredElement.domNode.closest('table');
+    //   if (cursoredTable){
+    //     // TableToolbar.enable(quill, [cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
+    //     // TableToolbar.disable(quill, [!cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
+    //   }
+    // }
     // }
   }
 

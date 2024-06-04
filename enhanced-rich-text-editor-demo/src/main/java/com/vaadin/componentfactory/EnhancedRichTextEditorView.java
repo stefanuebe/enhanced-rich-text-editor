@@ -113,6 +113,15 @@ public class EnhancedRichTextEditorView extends DemoView {
 
     }
 
+//    private void createDefaultEditor() {
+//        // begin-source-example
+//        // source-example-heading: Basic Rich Text Editor
+//        EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
+//        rte.setMaxHeight("200px");
+//        // end-source-example
+//        addCard("Basic Rich Text Editor", rte);
+//    }
+
     private void createEditorWithCustomShortcutsForStandardButtons() {
       // begin-source-example
       // source-example-heading: Basic Rich Text Editor with custom shortcuts for standard buttons
