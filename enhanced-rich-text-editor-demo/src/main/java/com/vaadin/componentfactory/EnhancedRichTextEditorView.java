@@ -35,19 +35,17 @@ public class EnhancedRichTextEditorView extends DemoView {
 
     @Override
     protected void initView() {
-        EnhancedRichTextEditorTables.init();
-
         createDefaultEditor();
-//        createEditorWithTabstops();
-//        createGetValue();
-//        createGetHtmlValue();
-//        createEditorWithLimitedToolbar();
-//        createEditorWithReadonlySections();
-//        createEditorWithPlaceholders();
-//        createEditorWithCustomButtons();
-//        createEditorWithCustomShortcutsForStandardButtons();
-//        createEditorWithIconReplacementForStandardButtons();
-//        createEditorWithNoRules();
+        createEditorWithTabstops();
+        createGetValue();
+        createGetHtmlValue();
+        createEditorWithLimitedToolbar();
+        createEditorWithReadonlySections();
+        createEditorWithPlaceholders();
+        createEditorWithCustomButtons();
+        createEditorWithCustomShortcutsForStandardButtons();
+        createEditorWithIconReplacementForStandardButtons();
+        createEditorWithNoRules();
     }
 
     private void createDefaultEditor() {
@@ -415,16 +413,16 @@ public class EnhancedRichTextEditorView extends DemoView {
     }
 
 
-    @Override
-    public void populateSources() {
-//        super.populateSources();
-
-        String javaFile = getClass().getSimpleName() + ".java";
-        String formattedPackageName = getClass().getPackage().getName()
-                .replaceAll("\\.", "/");
-        String resourcePath = "../test-classes/" + formattedPackageName + "/"
-                              + javaFile;
-
-    }
+//    @Override
+//    public void populateSources() {
+////        super.populateSources();
+//
+//        String javaFile = getClass().getSimpleName() + ".java";
+//        String formattedPackageName = getClass().getPackage().getName()
+//                .replaceAll("\\.", "/");
+//        String resourcePath = "../test-classes/" + formattedPackageName + "/"
+//                              + javaFile;
+//
+//    }
 }
 

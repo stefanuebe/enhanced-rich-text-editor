@@ -26,10 +26,6 @@ public class EnhancedRichTextEditorTables {
     private static final String SCRIPTS = "window.Vaadin.Flow._enhanced_rich_text_editor.";
     private static final String SCRIPTS_TABLE = "window.Vaadin.Flow._enhanced_rich_text_editor.tables.";
 
-    public static void init() {
-        UI.getCurrent().getElement().executeJs(SCRIPTS + "registerModule()");
-    }
-
     public static void initToolbarTable(EnhancedRichTextEditor rte) {
         // insert new table
         IntegerField rows = createTableInsertNumberField(

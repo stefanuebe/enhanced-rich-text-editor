@@ -14,7 +14,7 @@ webpack.generated.js
 webpack.config.js
 package.json
 **/frontend/index.html
-frontend/generated/
+**/frontend/generated/
 .npmrc
 .pnpmfile.cjs
 pnpm-lock.yaml

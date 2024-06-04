@@ -26,7 +26,10 @@ public class ToolbarPopup extends Popup {
     public ToolbarPopup(ToolbarSwitch referencedSwitch) {
         setTarget(referencedSwitch.getElement());
         setFocusTrap(true);
-        setRestoreFocusOnClose(true);
+
+        //        setRestoreFocusOnClose(true); // not working with 24 anymore, so we set it manually
+        getElement().setProperty("restoreFocusOnClose", true);
+
         addPopupOpenChangedEventListener(event -> referencedSwitch.setActive(event.isOpened()));
 
         referencedSwitch.addAttachListener(event -> {
