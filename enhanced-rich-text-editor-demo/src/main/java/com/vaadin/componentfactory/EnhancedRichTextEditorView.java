@@ -96,12 +96,13 @@ public class EnhancedRichTextEditorView extends DemoView {
                                        "s.innerHTML = $0;" +
                                        "this.shadowRoot.append(s);", styles);
 
-        rte.setMaxHeight("200px");
+        rte.setMaxHeight("500px");
 
         // end-source-example
         Pre pre = new Pre();
         pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
-        pre.setMinHeight("200px");
+        pre.setHeight("150px");
+        pre.getStyle().set("overflow", "auto");
         rte.setValueChangeMode(ValueChangeMode.EAGER);
         addCard("Basic Rich Text Editor", rte, pre);
 

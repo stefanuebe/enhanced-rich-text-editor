@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -57,12 +58,22 @@ public class EnhancedRichTextEditorTables {
         ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settingsButton);
         selectPopup.addItem("Add row above", event -> tableAction(rte,"append-row-above"));
         selectPopup.addItem("Add row below", event -> tableAction(rte,"append-row-below"));
+        selectPopup.addItem("Remove row", event -> tableAction(rte,"remove-row"));
+        selectPopup.add(new Hr());
+        selectPopup.addItem("Add col before", event -> tableAction(rte,"append-col-before"));
+        selectPopup.addItem("Add col after", event -> tableAction(rte,"append-col-after"));
+        selectPopup.addItem("Remove col", event -> tableAction(rte,"remove-col"));
 
+        selectPopup.add(new Hr());
         List<MenuItem> cellActions = List.of(
                 selectPopup.addItem("Merge Cells", event -> tableAction(rte,"merge-selection"))
         );
 
         selectPopup.addItem("Split Cells", event -> tableAction(rte,"split-cell"));
+
+        selectPopup.add(new Hr());
+        selectPopup.addItem("Remove table", event -> tableAction(rte,"remove-table"));
+
 
         ComponentUtil.addListener(rte, TableSelectedEvent.class, event -> {
             settingsButton.setEnabled(event.isSelected());

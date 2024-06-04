@@ -682,18 +682,18 @@ export default class TableTrick {
         case 'merge-selection':
           TableTrick.mergeSelection(quill);
           break;
-        case 'remove-cell':
-          TableTrick.removeCell(quill);
-          break;
+        // case 'remove-cell':
+        //   TableTrick.removeCell(quill);
+        //   break;
         case 'remove-selection':
           TableTrick.removeSelection(quill);
           break;
-        case 'hide-border':
-          TableTrick.borderToggle(quill, true);
-          break;
-        case 'show-border':
-          TableTrick.borderToggle(quill, false);
-          break;
+        // case 'hide-border':
+        //   TableTrick.borderToggle(quill, true);
+        //   break;
+        // case 'show-border':
+        //   TableTrick.borderToggle(quill, false);
+        //   break;
         case 'undo':
           if (quill.history.stack.undo.length) {
             const entry = quill.history.stack.undo[quill.history.stack.undo.length - 1];
