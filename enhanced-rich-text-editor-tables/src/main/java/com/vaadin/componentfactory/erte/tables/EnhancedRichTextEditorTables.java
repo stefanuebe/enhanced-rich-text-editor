@@ -1,5 +1,6 @@
-package com.vaadin.componentfactory;
+package com.vaadin.componentfactory.erte.tables;
 
+import com.vaadin.componentfactory.EnhancedRichTextEditor;
 import com.vaadin.componentfactory.EnhancedRichTextEditor.RichTextEditorI18n;
 import com.vaadin.componentfactory.toolbar.ToolbarPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSelectPopup;
@@ -13,10 +14,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 @NpmPackage(value = "quill-delta", version = "5.1.0")
@@ -27,7 +31,7 @@ public class EnhancedRichTextEditorTables {
     private static final String SCRIPTS_TABLE = "window.Vaadin.Flow._enhanced_rich_text_editor.tables.";
 
     private final EnhancedRichTextEditor rte;
-    private TemplatesPopup stylesPopup;
+    private TemplatePopup stylesPopup;
 
     public EnhancedRichTextEditorTables(EnhancedRichTextEditor rte) {
         this.rte = rte;
@@ -51,7 +55,7 @@ public class EnhancedRichTextEditorTables {
                 rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Amount of columns for the new table")
         );
 
-        Button add = new Button(VaadinIcon.PLUS.create(), event -> tableInsertNew(rows.getValue(), cols.getValue()));
+        Button add = new Button(VaadinIcon.PLUS.create(), event -> insertTableAtCurrentPosition(rows.getValue(), cols.getValue()));
         add.setTooltipText(rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
 
         ToolbarSwitch insertButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.PLUS);
@@ -65,25 +69,25 @@ public class EnhancedRichTextEditorTables {
         settingsButton.setEnabled(false);
 
         ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settingsButton);
-        selectPopup.addItem("Add row above", event -> tableAction("append-row-above"));
-        selectPopup.addItem("Add row below", event -> tableAction("append-row-below"));
-        selectPopup.addItem("Remove row", event -> tableAction("remove-row"));
+        selectPopup.addItem("Add row above", event -> executeTableAction("append-row-above"));
+        selectPopup.addItem("Add row below", event -> executeTableAction("append-row-below"));
+        selectPopup.addItem("Remove row", event -> executeTableAction("remove-row"));
         selectPopup.add(new Hr());
-        selectPopup.addItem("Add col before", event -> tableAction("append-col-before"));
-        selectPopup.addItem("Add col after", event -> tableAction("append-col-after"));
-        selectPopup.addItem("Remove col", event -> tableAction("remove-col"));
+        selectPopup.addItem("Add col before", event -> executeTableAction("append-col-before"));
+        selectPopup.addItem("Add col after", event -> executeTableAction("append-col-after"));
+        selectPopup.addItem("Remove col", event -> executeTableAction("remove-col"));
 
         selectPopup.add(new Hr());
-        MenuItem mergeCells = selectPopup.addItem("Merge Cells", event -> tableAction( "merge-selection"));
+        MenuItem mergeCells = selectPopup.addItem("Merge Cells", event -> executeTableAction( "merge-selection"));
 
-        selectPopup.addItem("Split Cells", event -> tableAction("split-cell"));
+        selectPopup.addItem("Split Cells", event -> executeTableAction("split-cell"));
 
         selectPopup.add(new Hr());
-        selectPopup.addItem("Remove table", event -> tableAction("remove-table"));
+        selectPopup.addItem("Remove table", event -> executeTableAction("remove-table"));
 
         ToolbarSwitch stylesButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.EYE);
         stylesButton.setEnabled(false);
-        stylesPopup = new TemplatesPopup(stylesButton);
+        stylesPopup = new TemplatePopup(stylesButton);
 
         ComponentUtil.addListener(rte, TableSelectedEvent.class, event -> {
             insertButton.setEnabled(!event.isSelected());
@@ -91,14 +95,24 @@ public class EnhancedRichTextEditorTables {
             stylesButton.setEnabled(event.isSelected());
 
             boolean cellSelectionActive = event.isCellSelectionActive();
-            insertButton.setEnabled(!cellSelectionActive);
             mergeCells.setEnabled(cellSelectionActive);
 
-            stylesPopup.setActiveTemplateName(event.getTemplate());
-
+            // update the styles popup with the selected table's template
+            stylesPopup.setActiveTemplate(event.getTemplate());
         });
 
-
+        stylesPopup.addTemplateSelectedListener(event -> setTemplateForCurrentTable(event.getTemplate()));
+        stylesPopup.addTemplatesChangedListener(event -> {
+            try {
+                String string = TemplateParser.parse(event.getSource().getTemplates());
+                setClientSideStyles(string);
+            } catch (Exception e) {
+                // TODO add error handler or smth.
+                Notification
+                        .show("Could not parse changes from template popup. Please check your inputs and inform the admin")
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
 
         rte.addCustomToolbarComponents(insertButton, settingsButton, stylesButton);
     }
@@ -106,6 +120,9 @@ public class EnhancedRichTextEditorTables {
     public void setTemplates(JsonObject jsonObject) {
         // TODO allow setting of templates without enabled styles popup
         Objects.requireNonNull(stylesPopup).setTemplates(jsonObject);
+
+        setClientSideStyles(TemplateParser.parse(jsonObject));
+
     }
 
     /**
@@ -118,7 +135,7 @@ public class EnhancedRichTextEditorTables {
         rte.getElement().executeJs(SCRIPTS_TABLE + "_setStyles(this, $0)", cssString);
     }
 
-    public void tableInsertNew(int rows, int cols) {
+    public void insertTableAtCurrentPosition(int rows, int cols) {
         if (rows <= 0 || cols <= 0) {
             throw new IllegalArgumentException("Rows and cols must be greater 0");
         }
@@ -126,7 +143,11 @@ public class EnhancedRichTextEditorTables {
         rte.getElement().executeJs(SCRIPTS_TABLE+ "insert(this, $0, $1)", rows, cols);
     }
 
-    public void tableAction(String action) {
+    public void setTemplateForCurrentTable(@Nullable String template) {
+        rte.getElement().executeJs(SCRIPTS_TABLE + "setTemplate(this, $0)", template);
+    }
+
+    public void executeTableAction(String action) {
         rte.getElement().executeJs(SCRIPTS_TABLE+ "action(this, $0)", action);
     }
 
@@ -150,13 +171,11 @@ public class EnhancedRichTextEditorTables {
         return field;
     }
 
-
-
-    public Registration addTemplatesChangedListener(ComponentEventListener<TemplatesPopup.TemplatesChangedEvent> listener) {
+    public Registration addTemplatesChangedListener(ComponentEventListener<TemplatePopup.TemplatesChangedEvent> listener) {
         return stylesPopup.addTemplatesChangedListener(listener);
     }
 
-    public Registration addTemplateSelectedListener(ComponentEventListener<TemplatesPopup.TemplateSelecteEvent> listener) {
+    public Registration addTemplateSelectedListener(ComponentEventListener<TemplatePopup.TemplateSelectedEvent> listener) {
         return stylesPopup.addTemplateSelectedListener(listener);
     }
 }

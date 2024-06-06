@@ -58,8 +58,19 @@ import TableTrick from "./js/TableTrick.js";
                     rte.shadowRoot.append(s);
                 }
                 s.innerHTML = styles;
+            },
 
-            }
+            _getSelectedTable(rte) {
+                return rte._editor.__selectedTable;
+            },
+
+            setTemplate(rte, template) {
+                const classList = this._getSelectedTable(rte)?.classList;
+                if (classList) {
+                    classList.remove(...classList);
+                    classList.add(template);
+                }
+            },
         }
 
     }

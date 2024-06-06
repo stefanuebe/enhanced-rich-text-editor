@@ -1,12 +1,10 @@
-package com.vaadin.componentfactory;
+package com.vaadin.componentfactory.erte.tables;
 
-import com.vaadin.componentfactory.Templates.CssBuilder;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,12 +23,10 @@ public class TemplateCssBuilderTest {
         String jsonString = Files.readString(pathJson);
         String cssString = Files.readString(pathCss).replace("\r\n", "\n"); // assure same type of line breaks
 
-
-
         // assure it is a valid json, if not we throw an exception, since not part of the test
         JsonObject json = Json.parse(jsonString);
 
-        CssBuilder cssBuilder = new CssBuilder(json);
+        TemplateParser cssBuilder = new TemplateParser(json);
         String generated = cssBuilder.toCss();
 
         Assert.assertEquals(cssString, generated);

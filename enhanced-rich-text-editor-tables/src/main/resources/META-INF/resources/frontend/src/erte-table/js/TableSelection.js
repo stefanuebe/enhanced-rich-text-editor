@@ -101,102 +101,57 @@ class TableSelection {
   }
 
   static selectionChange(quill, range = null, oldRange = null) {
+
+    // just assure, that our quill is already attached
     const host = quill?.root?.getRootNode()?.host;
     if (host?.tagName !== "VCF-ENHANCED-RICH-TEXT-EDITOR") {
       throw new Error("invalid dom state", host);
     }
 
-    let isInTable = TableSelection.selectionStartElement != null || TableSelection.selectionEndElement != null;
-    // old original addon variant
-    // if (TableSelection.selectionStartElement || TableSelection.selectionEndElement) {
-    //   // there is a table selection
-    //   isInTable = true;
-    //   // TableToolbar.enable(quill, ['split-cell', 'merge-selection', 'remove-selection', TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border'] );
-    //   //disable selection based on hidden class
-    //   // TableToolbar.disable(quill, !TableSelection.selectionStartElement.closest('table').classList.contains(hiddenBorderClassName)?'show-border':'hide-border');
-    //
-    // } else {
-    //   // Text selection
-    //   // TableToolbar.disable(quill, ['split-cell', 'merge-selection', 'remove-selection']);
-    //   let selectionStartElement, selectionEndElement;
-    //   if (range === null && oldRange !== null) {
-    //     // There is a previous Quill selection but editor is no longer focused (selection-change event)
-    //     const [startLeaf] = quill.getLeaf(oldRange.index);
-    //     const [endLeaf] = quill.getLeaf(oldRange.index + oldRange.length);
-    //     selectionStartElement = startLeaf.parent.domNode;
-    //     selectionEndElement = endLeaf.parent.domNode;
-    //   } else {
-    //     // No Quill selection, use browser's  getSelection instead (chrome and firefox proof)
-    //     const selection = host.shadowRoot.getSelection ? host.shadowRoot.getSelection() : document.getSelection();
-    //     selectionStartElement = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
-    //     selectionEndElement = selection.focusNode ? (selection.focusNode.nodeType === Node.TEXT_NODE ? selection.focusNode.parentElement : selection.focusNode) : null;
-    //   }
-    //
-    //   if (selectionStartElement && selectionEndElement) {
-    //     // there is a text selection
-    //     let closestTable = selectionStartElement.closest('table');
-    //     if (closestTable && closestTable.closest('.ql-editor')) {
-    //       if (selectionEndElement !== selectionStartElement) {
-    //         closestTable = selectionEndElement.closest('table');
-    //         isInTable = closestTable && closestTable.closest('.ql-editor');
-    //       } else {
-    //         isInTable = true;
-    //       }
-    //     }
-    //   } // no selection = not in table
-    // }
+    // check, if the current "global" selection is in the editor, otherwise do not fire a table selection event,
+    // as it will result in "null" for any clicks outside the editor:
+    const selection = host.shadowRoot.getSelection ? host.shadowRoot.getSelection() : document.getSelection();
+    const selectedNode = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
+    const editor = selectedNode?.closest(".ql-editor");
+    if (editor) { // we are in quill context, so fine to fire events
+      console.warn("we are in editor");
+      let isInTable = TableSelection.selectionStartElement != null || TableSelection.selectionEndElement != null;
+      let tableTemplate = "";
 
-    // new variant
-    let tableTemplate = "";
-    if (TableSelection.selectionStartElement) {
-      // obtain table and class from "cell selection"
-      const table = TableSelection.selectionStartElement.closest("table");
-      tableTemplate = table?.classList?.toString();
-    } else {
-      // obtain table and class from normal text selection
-      const selection = quill.getSelection();
-      if (selection) {
-        const leaf = quill.getLeaf(selection.index)?.[0]?.domNode;
-        if (leaf) {
-          const table = (leaf.tagName ? leaf : leaf.parentElement).closest("table");
+      delete quill.__selectedTable;
+      if (TableSelection.selectionStartElement) {
+        // obtain table and class from "cell selection"
+        const table = TableSelection.selectionStartElement.closest("table");
+        tableTemplate = table?.classList?.toString();
+        quill.__selectedTable = table;
+      } else {
+        // obtain table and class from normal text selection
+        const selection = quill.getSelection();
+        if (selection) {
+          const leaf = quill.getLeaf(selection.index)?.[0]?.domNode;
+          if (leaf) {
+            const table = (leaf.tagName ? leaf : leaf.parentElement).closest("table");
 
-          if (!isInTable) { // set flag if necessary
-            isInTable = table != null;
+            if (!isInTable) { // set flag if necessary
+              isInTable = table != null;
+            }
+            tableTemplate = table?.classList?.toString();
+            quill.__selectedTable = table;
           }
-          tableTemplate = table?.classList?.toString();
         }
       }
+
+      this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement != null, tableTemplate);
+
+      if (!isInTable && quill.table.isInTable) {
+        quill.table.isInTable = false;
+      }
+
+      if (isInTable && !quill.table.isInTable) {
+        quill.table.isInTable = true;
+
+      }
     }
-
-    this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement != null, tableTemplate);
-
-    if (!isInTable && quill.table.isInTable) {
-      quill.table.isInTable = false;
-      // TableToolbar.disableAll(quill);
-      // TableToolbar.enable(quill, ['newtable_*', 'insert', 'undo', 'redo']);
-      //
-      // this.dispatchSelectionEvent(host, false, false);
-    }
-
-    if (isInTable && !quill.table.isInTable) {
-      quill.table.isInTable = true;
-      // TableToolbar.enable(quill, ['append-row*', 'append-col*', 'remove-cell', 'remove-row', 'remove-col', 'remove-table']);
-      // this.dispatchSelectionEvent(host, true, true);
-
-    }
-
-    // if (isInTable && quill.table.isInTable){ //we are in a table, are we cursored?
-    // let cursoredSelection = quill.getSelection();
-    //
-    // if (cursoredSelection) { //we are in table with a cursoredSelection
-    //   const [cursoredElement] = quill.getLine(cursoredSelection.index);
-    //   let cursoredTable = cursoredElement.domNode.closest('table');
-    //   if (cursoredTable){
-    //     // TableToolbar.enable(quill, [cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
-    //     // TableToolbar.disable(quill, [!cursoredTable.classList.contains(hiddenBorderClassName)?'show-border':'hide-border']);
-    //   }
-    // }
-    // }
   }
 
   static dispatchSelectionEvent(eventDispatcher, tableSelected, cellSelectionActive, template) {

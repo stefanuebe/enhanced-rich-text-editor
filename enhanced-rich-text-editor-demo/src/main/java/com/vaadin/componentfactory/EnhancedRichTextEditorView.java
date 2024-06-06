@@ -1,13 +1,12 @@
 package com.vaadin.componentfactory;
 
-import com.steadystate.css.parser.CSSOMParser;
 import com.vaadin.componentfactory.EnhancedRichTextEditor.ToolbarButton;
+import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTables;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.icon.Icon;
@@ -19,10 +18,10 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import elemental.json.Json;
-import elemental.json.JsonObject;
-import org.w3c.dom.css.CSSRule;
 
-import javax.swing.text.html.CSS;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +36,7 @@ public class EnhancedRichTextEditorView extends DemoView {
 
     @Override
     protected void initView() {
+        createEditorWithTableSample(); // TODO move to bottom
         createDefaultEditor();
         createEditorWithTabstops();
         createGetValue();
@@ -50,90 +50,44 @@ public class EnhancedRichTextEditorView extends DemoView {
         createEditorWithNoRules();
     }
 
-    private void createDefaultEditor() {
+    private void createEditorWithTableSample() {
         // begin-source-example
         // source-example-heading: Basic Rich Text Editor
         EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
         EnhancedRichTextEditorTables tables = EnhancedRichTextEditorTables.enable(rte);
 
-        String styles = "table.template1 {\n" +
-                        "    color: gray;\n" +
-                        "}\n" +
-                        "\n" +
-                        "\n" +
-                        "table.template1 > tr > td:nth-of-type(1) {\n" +
-                        "    width: 50px;\n" +
-                        "    background-color: whitesmoke;\n" +
-                        "}" +
-                        "\n\ntable.template2 {\n" +
-                        "    color: green;\n" +
-                        "}\n" +
-                        "table.template1 > tr:nth-of-type(1) > td {\n" +
-                        "    color: white;\n" +
-                        "    font-size: 110%;\n" +
-                        "    font-weight: bold;\n" +
-                        "    background-color: #444;\n" +
-                        "}\n" +
-                        "\n" +
-                        "table.template1 > tr:nth-of-type(2) > td{\n" +
-                        "    color: black;\n" +
-                        "    font-weight: bold;\n" +
-                        "    background-color: whitesmoke;\n" +
-                        "}\n" +
-                        "\n" +
-                        "table.template2 > tr:nth-of-type(1) > td{\n" +
-                        "    color: gray;\n" +
-                        "    font-size: 110%;\n" +
-                        "    font-weight: bold;\n" +
-                        "    background-color: whitesmoke;\n" +
-                        "}\n" +
-                        "\n" +
-                        "\n" +
-                        "table.template2 > tr > td:nth-of-type(1){\n" +
-                        "    width: 50px;\n" +
-                        "    background-color: whitesmoke;\n" +
-                        "}";
 
-        tables.setClientSideStyles(styles);
+        // assure test files can be read
+        try {
+            tables.setTemplates(Json.parse(Files.readString(Path.of("table-sample-templates.json"))));
 
-        JsonObject templates = Json.createObject();
-        JsonObject template1 = Json.createObject();
-//        JsonObject template1Table = Json.createObject();
-//        template1Table.put(TemplatesJson.BACKGROUND, "whitesmoke");
-//        template1Table.put(TemplatesJson.COLOR, "red");
-//
-//        template1.put("table", template1Table);
-        templates.put("template1", template1);
-        JsonObject template2 = Json.createObject();
-        templates.put("template2", template2);
-//
-        tables.setTemplates(templates);
+            rte.setMaxHeight("500px");
 
-        rte.setMaxHeight("500px");
-
-        // end-source-example
-        Pre pre = new Pre();
-        pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
-        pre.setHeight("150px");
-        pre.getStyle().set("overflow", "auto");
-        rte.setValueChangeMode(ValueChangeMode.EAGER);
-        addCard("Basic Rich Text Editor", rte, pre);
+            // end-source-example
+            Pre pre = new Pre();
+            pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
+            pre.setHeight("150px");
+            pre.getStyle().set("overflow", "auto");
+            rte.setValueChangeMode(ValueChangeMode.EAGER);
+            addCard("Rich Text Editor with Table Addon", rte, pre);
 
 
-        rte.addValueChangeListener(event -> pre.setText(event.getValue()));
-
-        rte.setValue("[{\"insert\":\"1\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|mbj24z2nkwo||||template1\"},\"insert\":\"\\n\"},{\"insert\":\"2\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|rbsptna6y9|n9slf7tm49j||||\"},\"insert\":\"\\n\"},{\"insert\":\"3\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|0vcytjx5tesh||||\"},\"insert\":\"\\n\"},{\"insert\":\"4\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|9let746pqen|9iqke2xds5b||||\"},\"insert\":\"\\n\"},{\"insert\":\"5\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|eu3h35wvnxb||||\"},\"insert\":\"\\n\"},{\"insert\":\"6\"},{\"attributes\":{\"0\":\"T\",\"1\":\"A\",\"2\":\"B\",\"3\":\"L\",\"4\":\"E\",\"td\":\"nk8yq5xszn|r6ypom1k0v|mvic5kzo8r||||\"},\"insert\":\"\\n\"},{\"insert\":\"\\n\"}]\n");
+            rte.addValueChangeListener(event -> pre.setText(event.getValue()));
+            rte.setValue(Files.readString(Path.of("table-sample-delta.json")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
-//    private void createDefaultEditor() {
-//        // begin-source-example
-//        // source-example-heading: Basic Rich Text Editor
-//        EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
-//        rte.setMaxHeight("200px");
-//        // end-source-example
-//        addCard("Basic Rich Text Editor", rte);
-//    }
+    private void createDefaultEditor() {
+        // begin-source-example
+        // source-example-heading: Basic Rich Text Editor
+        EnhancedRichTextEditor rte = new EnhancedRichTextEditor();
+        rte.setMaxHeight("200px");
+        // end-source-example
+        addCard("Basic Rich Text Editor", rte);
+    }
 
     private void createEditorWithCustomShortcutsForStandardButtons() {
       // begin-source-example
