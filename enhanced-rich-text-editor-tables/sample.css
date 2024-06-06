@@ -1,0 +1,35 @@
+table.template1 {
+    color: blue;
+    border: 0 none transparent;
+}
+
+table.template1 > tr:nth-of-type(1) {
+    color: white;
+    background-color: #333;
+}
+
+table.template1 > tr:nth-of-type(2) {
+    color: #666;
+    background-color: gray;
+}
+
+table.template1 > tr:nth-last-of-type(1) {
+    color: white;
+    background-color: #333;
+}
+
+table.template1 > tr > td:nth-of-type(1) {
+    color: #666;
+    background-color: gray;
+    width: 5rem;
+}
+
+table.template1 > tr:nth-of-type(3) > td:nth-of-type(3) {
+    color: red;
+    background-color: yellow;
+}
+
+table.template1 > tr:nth-of-type(4) > td:nth-of-type(4) {
+    color: blue;
+    background-color: skyblue;
+}

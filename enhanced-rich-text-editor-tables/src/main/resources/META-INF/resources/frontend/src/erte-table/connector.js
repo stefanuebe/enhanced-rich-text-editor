@@ -48,6 +48,17 @@ import TableTrick from "./js/TableTrick.js";
                 if (!rte._editor.hasFocus()) {
                     rte._editor.focus();
                 }
+            },
+
+            _setStyles(rte, styles) {
+                let s = rte.shadowRoot.querySelector('#table-template-styles')
+                if (!s) {
+                    s = document.createElement('style');
+                    s.id = 'table-template-styles';
+                    rte.shadowRoot.append(s);
+                }
+                s.innerHTML = styles;
+
             }
         }
 

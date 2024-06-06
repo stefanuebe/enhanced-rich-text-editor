@@ -288,6 +288,11 @@ const richTextEditor = css`
         :host([theme~='compact']) [part~='toolbar-group'] {
           margin: 0 calc(var(--lumo-space-m) / 2 - 1px);
         } 
+
+        .ql-editor table td.ql-cell-selected {
+          background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
+        }
+
 `;
 
 const styles = document.createElement("style");

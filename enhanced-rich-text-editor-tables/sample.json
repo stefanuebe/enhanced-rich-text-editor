@@ -1,0 +1,58 @@
+{
+    "template1": {
+        "table": {
+            "color": "blue",
+            "border": "0 none transparent",
+        },
+        "rows": [
+            {
+                "index": "1",
+                "declarations" : {
+                    "color": "white",
+                    "bgColor": "#333"
+                }
+            },{
+                "index": "2",
+                "declarations": {
+                    "color": "#666",
+                    "bgColor": "gray"
+                }
+            },{
+                "index": "1",
+                "last": true,
+                "declarations" : {
+                    "color": "white",
+                    "bgColor": "#333"
+                }
+            }
+        ],
+        "cols": [
+            {
+                "index": "1",
+                "declarations": {
+                    "color": "#666",
+                    "bgColor": "gray",
+                    "width": "5rem"
+                }
+            }
+        ],
+        "cells": [
+            {
+                "x": 3,
+                "y": 3,
+                "declarations": {
+                    "color": "red",
+                    "bgColor": "yellow"
+                }
+            },
+            {
+                "x": 4,
+                "y": 4,
+                "declarations": {
+                    "color": "blue",
+                    "bgColor": "skyblue"
+                }
+            }
+        ]
+    }
+}
