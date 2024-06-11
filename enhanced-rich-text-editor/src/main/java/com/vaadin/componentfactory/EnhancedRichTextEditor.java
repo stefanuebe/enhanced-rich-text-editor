@@ -523,12 +523,6 @@ public class EnhancedRichTextEditor
         private String placeholderAppearanceLabel2;
         private String placeholderDialogTitle;
         private String clean;
-        private String tableInsertSwitchTooltip;
-        private String tableInsertRows;
-        private String tableInsertCols;
-        private String tableInsertRowsTooltip;
-        private String tableInsertColsTooltip;
-        private String tableInsertAddButtonTooltip;
 
         /**
          * Gets the translated word for {@code undo}
@@ -1187,54 +1181,6 @@ public class EnhancedRichTextEditor
             return this;
         }
 
-        public String getTableInsertSwitchTooltip() {
-            return tableInsertSwitchTooltip;
-        }
-
-        public void setTableInsertSwitchTooltip(String tableInsertSwitchTooltip) {
-            this.tableInsertSwitchTooltip = tableInsertSwitchTooltip;
-        }
-
-        public String getTableInsertRows() {
-            return tableInsertRows;
-        }
-
-        public void setTableInsertRows(String tableInsertRows) {
-            this.tableInsertRows = tableInsertRows;
-        }
-
-        public String getTableInsertCols() {
-            return tableInsertCols;
-        }
-
-        public void setTableInsertCols(String tableInsertCols) {
-            this.tableInsertCols = tableInsertCols;
-        }
-
-        public String getTableInsertRowsTooltip() {
-            return tableInsertRowsTooltip;
-        }
-
-        public void setTableInsertRowsTooltip(String tableInsertRowsTooltip) {
-            this.tableInsertRowsTooltip = tableInsertRowsTooltip;
-        }
-
-        public String getTableInsertColsTooltip() {
-            return tableInsertColsTooltip;
-        }
-
-        public void setTableInsertColsTooltip(String tableInsertColsTooltip) {
-            this.tableInsertColsTooltip = tableInsertColsTooltip;
-        }
-
-        public String getTableInsertAddButtonTooltip() {
-            return tableInsertAddButtonTooltip;
-        }
-
-        public void setTableInsertAddButtonTooltip(String tableInsertAddButtonTooltip) {
-            this.tableInsertAddButtonTooltip = tableInsertAddButtonTooltip;
-        }
-
         /**
          * Gets the stringified values of the tooltips.
          *
@@ -1253,7 +1199,7 @@ public class EnhancedRichTextEditor
                    + placeholderAppearance + ", " + placeholderComboBoxLabel
                    + ", " + placeholderAppearanceLabel1 + ", "
                    + placeholderAppearanceLabel2 + ", "
-                   + placeholderDialogTitle + ", " + clean + ", " + tableInsertSwitchTooltip + ", " + tableInsertRows + ", " + tableInsertCols + "]";
+                   + placeholderDialogTitle + ", " + clean + "]";
         }
     }
 

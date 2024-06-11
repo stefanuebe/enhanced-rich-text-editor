@@ -12,13 +12,17 @@ public class TableSelectedEvent extends ComponentEvent<EnhancedRichTextEditor> {
 
     private final boolean cellSelectionActive;
     private final String template;
+    private final Integer rowIndex;
+    private final Integer colIndex;
 
     public TableSelectedEvent(
             EnhancedRichTextEditor source,
             boolean fromClient,
             @EventData("event.detail.selected") boolean selected,
             @EventData("event.detail.cellSelectionActive") boolean cellSelectionActive,
-            @EventData("event.detail.template") String template
+            @EventData("event.detail.template") String template,
+            @EventData("event.detail.rowIndex") Integer rowIndex,
+            @EventData("event.detail.colIndex") Integer colIndex
     ) {
 
         super(source, fromClient);
@@ -27,9 +31,18 @@ public class TableSelectedEvent extends ComponentEvent<EnhancedRichTextEditor> {
             throw new IllegalArgumentException("Illegal template name: " + template);
         }
 
+        if (rowIndex != null && rowIndex < 0) {
+            throw new IllegalArgumentException("Row index must not be negative");
+        }
+        if (colIndex != null && colIndex < 0) {
+            throw new IllegalArgumentException("Col index must not be negative");
+        }
+
         this.selected = selected;
         this.cellSelectionActive = cellSelectionActive;
         this.template = StringUtils.trimToNull(template);
+        this.rowIndex = rowIndex;
+        this.colIndex = colIndex;
     }
 
     public boolean isSelected() {
@@ -48,5 +61,13 @@ public class TableSelectedEvent extends ComponentEvent<EnhancedRichTextEditor> {
      */
     public String getTemplate() {
         return template;
+    }
+
+    public Integer getColIndex() {
+        return colIndex;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
     }
 }

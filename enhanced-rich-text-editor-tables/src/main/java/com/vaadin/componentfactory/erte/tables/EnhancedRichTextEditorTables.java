@@ -40,26 +40,21 @@ public class EnhancedRichTextEditorTables {
     public static EnhancedRichTextEditorTables enable(EnhancedRichTextEditor rte) {
         EnhancedRichTextEditorTables tables = new EnhancedRichTextEditorTables(rte);
         tables.initToolbarTable();
+
         return tables;
     }
 
     public void initToolbarTable() {
         // insert new table
-        IntegerField rows = createTableInsertNumberField(
-                rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertRows, "Rows"),
-                rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertRowsTooltip, "Amount of rows for the new table")
-        );
+        IntegerField rows = createTableInsertNumberField("Zeilen", "Anzahl Zeilen für die zu erstellende Tabelle.");
 
-        IntegerField cols = createTableInsertNumberField(
-                rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Columns"),
-                rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertCols, "Amount of columns for the new table")
-        );
+        IntegerField cols = createTableInsertNumberField("Spalten", "Anzahl Spalten für die zu erstellende Tabelle.");
 
         Button add = new Button(VaadinIcon.PLUS.create(), event -> insertTableAtCurrentPosition(rows.getValue(), cols.getValue()));
-        add.setTooltipText(rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertAddButtonTooltip, "Add new table"));
+        add.setTooltipText("Tabelle einfügen");
 
         ToolbarSwitch insertButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.PLUS);
-        insertButton.setTooltipText(rte.getI18nOrDefault(RichTextEditorI18n::getTableInsertSwitchTooltip, "Show/Hide the \"add new table\" elements"));
+        insertButton.setTooltipText("Neue Tabelle einfügen");
 
         ToolbarPopup insertPopup = ToolbarPopup.horizontal(insertButton, rows, new Span("x"), cols, add);
         insertPopup.setFocusOnOpenTarget(rows);
@@ -69,21 +64,21 @@ public class EnhancedRichTextEditorTables {
         settingsButton.setEnabled(false);
 
         ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settingsButton);
-        selectPopup.addItem("Add row above", event -> executeTableAction("append-row-above"));
-        selectPopup.addItem("Add row below", event -> executeTableAction("append-row-below"));
-        selectPopup.addItem("Remove row", event -> executeTableAction("remove-row"));
+        selectPopup.addItem("Zeile oberhalb einfügen", event -> executeTableAction("append-row-above"));
+        selectPopup.addItem("Zeile unterhalb einfügen", event -> executeTableAction("append-row-below"));
+        selectPopup.addItem("Zeile entfernen", event -> executeTableAction("remove-row"));
         selectPopup.add(new Hr());
-        selectPopup.addItem("Add col before", event -> executeTableAction("append-col-before"));
-        selectPopup.addItem("Add col after", event -> executeTableAction("append-col-after"));
-        selectPopup.addItem("Remove col", event -> executeTableAction("remove-col"));
+        selectPopup.addItem("Spalte links einfügen", event -> executeTableAction("append-col-before"));
+        selectPopup.addItem("Spalte rechts einfügen", event -> executeTableAction("append-col-after"));
+        selectPopup.addItem("Spalte entfernen", event -> executeTableAction("remove-col"));
 
         selectPopup.add(new Hr());
-        MenuItem mergeCells = selectPopup.addItem("Merge Cells", event -> executeTableAction( "merge-selection"));
+        MenuItem mergeCells = selectPopup.addItem("Zellen zusammenführen", event -> executeTableAction( "merge-selection"));
 
-        selectPopup.addItem("Split Cells", event -> executeTableAction("split-cell"));
+        selectPopup.addItem("Zellen trennen", event -> executeTableAction("split-cell"));
 
         selectPopup.add(new Hr());
-        selectPopup.addItem("Remove table", event -> executeTableAction("remove-table"));
+        selectPopup.addItem("Tabelle entfernen", event -> executeTableAction("remove-table"));
 
         ToolbarSwitch stylesButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.EYE);
         stylesButton.setEnabled(false);
@@ -99,12 +94,16 @@ public class EnhancedRichTextEditorTables {
 
             // update the styles popup with the selected table's template
             stylesPopup.setActiveTemplate(event.getTemplate());
+            if (event.getRowIndex() != null) {
+                stylesPopup.setSelectedRow(event.getRowIndex());
+            }
         });
 
         stylesPopup.addTemplateSelectedListener(event -> setTemplateForCurrentTable(event.getTemplate()));
         stylesPopup.addTemplatesChangedListener(event -> {
             try {
-                String string = TemplateParser.parse(event.getSource().getTemplates());
+                JsonObject templates = event.getSource().getTemplates();
+                String string = TemplateParser.parse(templates);
                 setClientSideStyles(string);
             } catch (Exception e) {
                 // TODO add error handler or smth.
@@ -137,7 +136,7 @@ public class EnhancedRichTextEditorTables {
 
     public void insertTableAtCurrentPosition(int rows, int cols) {
         if (rows <= 0 || cols <= 0) {
-            throw new IllegalArgumentException("Rows and cols must be greater 0");
+            throw new IllegalArgumentException("Zeile und Spalte müssen jeweils größer 0 sein!");
         }
 
         rte.getElement().executeJs(SCRIPTS_TABLE+ "insert(this, $0, $1)", rows, cols);

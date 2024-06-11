@@ -114,7 +114,6 @@ class TableSelection {
     const selectedNode = selection.anchorNode ? (selection.anchorNode.nodeType === Node.TEXT_NODE ? selection.anchorNode.parentElement : selection.anchorNode) : null;
     const editor = selectedNode?.closest(".ql-editor");
     if (editor) { // we are in quill context, so fine to fire events
-      console.warn("we are in editor");
       let isInTable = TableSelection.selectionStartElement != null || TableSelection.selectionEndElement != null;
       let tableTemplate = "";
 
@@ -141,7 +140,42 @@ class TableSelection {
         }
       }
 
-      this.dispatchSelectionEvent(host, isInTable, TableSelection.selectionStartElement != null, tableTemplate);
+      const selectedCell = selectedNode?.closest("td");
+      const selectedRow = selectedNode?.closest("tr");
+
+      quill.__selectedTableCell = selectedCell;
+      quill.__selectedTableRow = selectedRow;
+
+      // lookup the current column and row index
+      let colIndex, rowIndex;
+      if (quill.__selectedTable && selectedRow) {
+        const table = quill.__selectedTable;
+        for(let i = 0; i < table.childNodes.length && !rowIndex; i++) {
+          if(table.childNodes[i] === selectedRow) {
+            rowIndex = i;
+          }
+        }
+
+        if (selectedCell) {
+          for(let i = 0; i < selectedRow.childNodes.length && !colIndex; i++) {
+            if(selectedRow.childNodes[i] === selectedCell) {
+              colIndex = i;
+            }
+          }
+        }
+      }
+
+      console.warn(rowIndex, colIndex);
+
+      host.dispatchEvent(new CustomEvent("table-selected", {
+        detail: {
+          selected: isInTable,
+          cellSelectionActive: TableSelection.selectionStartElement != null,
+          template: tableTemplate,
+          colIndex,
+          rowIndex
+        }
+      }));
 
       if (!isInTable && quill.table.isInTable) {
         quill.table.isInTable = false;
@@ -153,17 +187,6 @@ class TableSelection {
       }
     }
   }
-
-  static dispatchSelectionEvent(eventDispatcher, tableSelected, cellSelectionActive, template) {
-    eventDispatcher.dispatchEvent(new CustomEvent("table-selected", {
-      detail: {
-        selected: tableSelected,
-        cellSelectionActive,
-        template
-      }
-    }));
-  }
-
   static getSelectionCoords() {
     if (TableSelection.selectionStartElement && TableSelection.selectionEndElement) {
       const coords = [

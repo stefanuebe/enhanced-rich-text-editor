@@ -6,7 +6,7 @@ import elemental.json.JsonObject;
 
 import java.util.Objects;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateContants.*;
+import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
 
 /**
  * Parses an Tables addon Css JSON Template and creates a css stylesheet out of it.

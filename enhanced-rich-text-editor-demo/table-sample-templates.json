@@ -3,7 +3,6 @@
         "name": "Template 1",
         "table": {
             "color": "blue",
-            "border": "0 none transparent"
         },
         "rows": [
             {
@@ -17,13 +16,6 @@
                 "declarations": {
                     "color": "#666",
                     "bgColor": "lightgray"
-                }
-            },{
-                "index": "1",
-                "last": true,
-                "declarations" : {
-                    "color": "white",
-                    "bgColor": "#333"
                 }
             }
         ],
@@ -52,17 +44,6 @@
                 "declarations": {
                     "color": "blue",
                     "bgColor": "skyblue"
-                }
-            }
-        ]
-    },
-    "template2": {
-        "name": "Alternating Rows",
-        "rows": [
-            {
-                "index": "2n",
-                "declarations" : {
-                    "bgColor": "whitesmoke"
                 }
             }
         ]

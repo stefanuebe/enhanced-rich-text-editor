@@ -7,6 +7,8 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -16,99 +18,107 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import elemental.json.*;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateContants.P_COLOR;
-import static com.vaadin.componentfactory.erte.tables.TemplateContants.TABLE;
+import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
 
 public class TemplatePopup extends ToolbarPopup {
 
     private final VerticalLayout layout;
     private final ComboBox<String> templateField;
-    private final Binder<JsonObject> binder;
+    private final Binder<JsonObject> tableBinder;
+    private final Binder<JsonObject> rowBinder;
+    private JsonObject currentTemplate;
     private JsonObject templates = Json.createObject();
+    private int selectedRow;
 
     public TemplatePopup(ToolbarSwitch referencedSwitch) {
         super(referencedSwitch);
 
-        binder = new Binder<>();
+        tableBinder = new Binder<>();
+        rowBinder = new Binder<>();
+
         templateField = new ComboBox<>();
+        applyOverlayPopupCloseWorkaround(templateField);
 
         layout = new VerticalLayout(templateField);
+        layout.setSpacing(false);
+        setCloseOnClick(false);
 
-        layout.add(createSettingsSection("Tabelle"));
-//        layout.add(new HorizontalLayout(
-//                createSettingsSizeField("Feste Breite"),
-//                createSettingsSizeField("Min. Breite"),
-//                createSettingsSizeField("Max. Breite")));
-        layout.add(new HorizontalLayout(createSettingsColorField("Textfarbe",
-                rules -> {
-                    String s1 = Optional.ofNullable(rules.getObject(TABLE)).map(declaration -> declaration.getString(P_COLOR)).orElse(null);
-                    return s1;
-                },
-                (rules, s) -> {
-                    JsonObject declaration = rules.getObject(TABLE);
-                    if (declaration == null) {
-                        declaration = Json.createObject();
-                        rules.put(TABLE, declaration);
-                    }
-
-                    declaration.put(P_COLOR, s); // TODO validate
-                }),
-                createSettingsColorField("Hintergrundfarbe", jsonObject1 -> null, (jsonObject1, s3) -> {
-        }), createSettingsBorderField("Rahmen", jsonObject -> null, (jsonObject, s2) -> {
-        })));
-
-//        layout.add(createSettingsSection("Spalte"));
-//        layout.add(new HorizontalLayout(
-//                createSettingsSizeField("Feste Breite"),
-//                createSettingsSizeField("Min. Breite"),
-//                createSettingsSizeField("Max. Breite")));
-//        layout.add(new HorizontalLayout(
-//                createSettingsColorField("Textfarbe"),
-//                createSettingsColorField("Hintergrundfarbe"),
-//                createSettingsBorderField("Rahmen")));
-//
-//        layout.add(createSettingsSection("Zelle"));
-//        layout.add(new HorizontalLayout(
-//                createSettingsColorField("Textfarbe"),
-//                createSettingsColorField("Hintergrundfarbe"),
-//                createSettingsBorderField("Rahmen")));
+        initTableForm();
+        initRowForm();
 
         templateField.addValueChangeListener(event -> {
             String value = StringUtils.trimToNull(event.getValue());
             if (value != null && this.templates.hasKey(value)) {
-                binder.setBean(this.templates.getObject(value));
+                currentTemplate = this.templates.getObject(value);
             } else {
-                binder.removeBean();
+                currentTemplate = null;
+            }
+
+            if (currentTemplate != null) {
+                JsonObject table = currentTemplate.getObject(TABLE);
+                if (table == null) {
+                    table = Json.createObject();
+                }
+                tableBinder.setBean(table);
             }
 
             fireEvent(new TemplateSelectedEvent(this, event.isFromClient(), value));
         });
-
-        binder.addStatusChangeListener(event -> {
-            System.out.println("state changed");
-        });
-
-        binder.addValueChangeListener(event -> {
-            System.out.println("value changed");
-            if (binder.isValid()) {
-                fireEvent(new TemplatesChangedEvent(this, event.isFromClient()));
-            }
-        });
-
-        setFocusTrap(true);
-        setRestoreFocusOnClose(true);
         setFocusOnOpenTarget(templateField);
 
         add(layout);
+
+        // Workaround for https://github.com/vaadin-component-factory/vcf-popup/issues/16
+        getElement().executeJs("this.addEventListener('popup-open-changed', e => {" +
+                               "    if(!e.detail.value && this.__stayOpen) {" +
+                               "        this.opened = true;" +
+                               "        delete this.__stayOpen;" +
+                               "    }" +
+                               "});");
+    }
+
+    private void initTableForm() {
+        layout.add(createSettingsSection("Tabelle"));
+        layout.add(new HorizontalLayout(createSettingsColorField("T Textfarbe", tableBinder, getter(P_COLOR), setter(P_COLOR))));
+
+        tableBinder.addValueChangeListener(event -> {
+            if (tableBinder.isValid()) {
+                fireEvent(new TemplatesChangedEvent(this, event.isFromClient()));
+            }
+        });
+    }
+
+    private static ValueProvider<JsonObject, String> getter(String key) {
+        return jsonObject -> jsonObject.hasKey(key) ? jsonObject.getString(key) : null;
+    }
+
+    private static Setter<JsonObject, String> setter(String key) {
+        return (jsonObject1, s) -> jsonObject1.put(key, s);
+    }
+
+    private void initRowForm() {
+        layout.add(createSettingsSection("Aktuelle Zeile"));
+        HorizontalLayout rowLayout = new HorizontalLayout(
+                createSettingsColorField("Z Textfarbe", rowBinder, getter(P_COLOR), setter(P_COLOR)),
+                createSettingsColorField("Z Hintergrundfarbe", rowBinder, getter(P_BACKGROUND), setter(P_BACKGROUND)));
+
+        rowLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        layout.add(rowLayout);
+
+        rowBinder.addValueChangeListener(event -> {
+            if (rowBinder.isValid()) {
+                fireEvent(new TemplatesChangedEvent(this, event.isFromClient()));
+            }
+        });
     }
 
     public void setTemplates(JsonObject templates) {
@@ -116,7 +126,7 @@ public class TemplatePopup extends ToolbarPopup {
 
         List<String> keys = new ArrayList<>(templates.keys().length);
         for (String key : templates.keys()) {
-            if (!TemplateContants.PATTERN_TEMPLATE_NAME.matcher(key).matches()) {
+            if (!TemplateConstants.PATTERN_TEMPLATE_NAME.matcher(key).matches()) {
                 throw new IllegalArgumentException("Invalid template name: " + key);
             }
             keys.add(key);
@@ -124,8 +134,47 @@ public class TemplatePopup extends ToolbarPopup {
 
         templateField.setItems(keys);
         templateField.setItemLabelGenerator(item -> this.templates.getObject(item).getString("name"));
-
     }
+
+    public void setSelectedRow(int row) {
+        if (row < 0) {
+            throw new IllegalArgumentException("Row must not be negative");
+        }
+
+        if (this.selectedRow != row) {
+            Notification.show("row changed to " + row);
+            this.selectedRow = row;
+
+            JsonArray array = currentTemplate.getArray(ROWS);
+            String index = String.valueOf(row + 1);
+            JsonObject rowObject = searchForIndexedObject(array, index, false); // css nth child are 1 based
+            JsonObject rowDeclarations;
+            if (rowObject == null) {
+                rowObject = Json.createObject();
+                rowObject.put(INDEX, index);
+                rowDeclarations = Json.createObject();
+                rowObject.put(DECLARATIONS, rowDeclarations);
+            } else {
+                rowDeclarations = rowObject.getObject(DECLARATIONS);
+            }
+            rowBinder.setBean(rowDeclarations); // null automatically clears the binder
+        }
+    }
+
+    private JsonObject searchForIndexedObject(JsonArray array, String index, boolean last) {
+        if (array != null) {
+            for (int i = 0; i < array.length(); i++) {
+                JsonObject object = array.getObject(i);
+                if ((!last || (object.hasKey(LAST) && object.getBoolean(LAST))) && index.equals(object.getString(INDEX))) {
+                    return object;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
 
     private static JsonObject clone(JsonObject objectToClone) {
         return Json.parse(objectToClone.toJson());
@@ -137,19 +186,19 @@ public class TemplatePopup extends ToolbarPopup {
         return h5;
     }
 
-    private TextField createSettingsBorderField(String label, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
-        TextField field = createSettingsTextField(label, getter, setter);
+    private TextField createSettingsBorderField(String label, Binder<JsonObject> binder, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
+        TextField field = createSettingsTextField(label, binder, getter, setter);
         field.setTooltipText("Expects a valid css border definition, e.g. 1px solid black");
         return field;
     }
 
-    private TextField createSettingsColorField(String label, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
-        TextField field = createSettingsTextField(label, getter, setter);
+    private TextField createSettingsColorField(String label, Binder<JsonObject> binder, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
+        TextField field = createSettingsTextField(label, binder, getter, setter);
         field.setTooltipText("Expects a valid css color definition, e.g. #123456 or red");
         return field;
     }
 
-    private TextField createSettingsTextField(String label, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
+    private TextField createSettingsTextField(String label, Binder<JsonObject> binder, ValueProvider<JsonObject, String> getter, Setter<JsonObject, String> setter) {
         TextField field = new TextField(label);
         field.setClearButtonVisible(true);
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
@@ -159,13 +208,14 @@ public class TemplatePopup extends ToolbarPopup {
         return field;
     }
 
-    private IntegerField createSettingsSizeField(String label) {
-        IntegerField field = createSettingsIntField(label);
+    private IntegerField createSettingsSizeField(String label, Binder<JsonObject> binder) {
+        IntegerField field = createSettingsIntField(label, binder);
         field.setTooltipText("Expects a positive integer value. Will be interpreted with the unit 'rem' (~ global font size)");
 
         return field;
     }
-    private IntegerField createSettingsIntField(String label) {
+
+    private IntegerField createSettingsIntField(String label, Binder<JsonObject> binder) {
         IntegerField field = new IntegerField(label);
         field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         field.setWidth("6rem");
@@ -174,7 +224,48 @@ public class TemplatePopup extends ToolbarPopup {
     }
 
     public JsonObject getTemplates() {
-        return clone(templates);
+        JsonObject clone = clone(templates);
+        removeEmptyChildren(clone);
+        return clone;
+    }
+
+    private void removeEmptyChildren(JsonObject container) {
+        List<String> keys = Arrays.asList(container.keys());
+        for (String key : keys) {
+            JsonValue value = container.get(key);
+            if (value instanceof JsonArray) {
+                JsonArray array = (JsonArray) value;
+
+                for (int i = array.length() - 1; i >= 0; i--) {
+                    JsonObject arrayChild = array.getObject(i);
+                    if (arrayChild.hasKey(DECLARATIONS)) {
+                        JsonObject declarations = arrayChild.getObject(DECLARATIONS);
+                        removeEmptyChildren(declarations);
+                        if (declarations.keys().length == 0) {
+                            array.remove(i);
+                        }
+                    }
+                }
+
+                if (array.length() == 0) {
+                    container.remove(key);
+                }
+            } else if (value instanceof JsonObject) {
+                removeEmptyChildren((JsonObject) value);
+                if (((JsonObject) value).keys().length == 0) {
+                    container.remove(key);
+                }
+            } else if (value != null) {
+                JsonType type = value.getType();
+                if (type == JsonType.STRING && StringUtils.trimToNull(value.asString()) == null) {
+                    container.remove(key);
+                } else if (type == JsonType.NULL) {
+                    container.remove(key);
+                }
+
+                // TODO implement other types if needed (but atM we just have Strings)
+            }
+        }
     }
 
     public void setActiveTemplate(@Nullable String template) {
@@ -183,6 +274,14 @@ public class TemplatePopup extends ToolbarPopup {
 
     public Optional<String> getActiveTemplate() {
         return templateField.getOptionalValue();
+    }
+
+    private void applyOverlayPopupCloseWorkaround(Component component) {
+        component.getElement().executeJs("this.addEventListener('opened-changed', e => {" +
+                                         "if(e.detail.value) {  " +
+                                         "    $0.__stayOpen = true;" +
+                                         "}" +
+                                         "});", this);
     }
 
     public Registration addTemplatesChangedListener(ComponentEventListener<TemplatesChangedEvent> listener) {
@@ -211,4 +310,6 @@ public class TemplatePopup extends ToolbarPopup {
             super(source, fromClient);
         }
     }
+
+
 }

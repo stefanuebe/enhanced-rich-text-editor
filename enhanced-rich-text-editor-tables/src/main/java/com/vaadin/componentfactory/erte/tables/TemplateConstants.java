@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public final class TemplateContants {
+public final class TemplateConstants {
     public static final String P_BACKGROUND = "bgColor";
     public static final String P_COLOR = "color";
     public static final String P_WIDTH = "width";
