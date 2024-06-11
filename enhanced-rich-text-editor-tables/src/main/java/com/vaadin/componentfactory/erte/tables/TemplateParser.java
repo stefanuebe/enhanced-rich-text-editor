@@ -66,6 +66,20 @@ public final class TemplateParser {
     }
 
     private void parseTable(JsonObject rules) {
+
+        // BORDER_CELLS is a special property, that needs a specialized treatment. It is not to be applied
+        // to the table selector directly, but to "all" cells
+        if(rules.hasKey(P_BORDER_CELLS)) {
+            String pBorderCells = rules.getString(P_BORDER_CELLS);
+            rules.remove(P_BORDER_CELLS);
+
+            appendTableSelectorPart();
+            builder.append(" > tr > td");
+            openDeclarationBlock();
+            appendDeclaration("border", pBorderCells);
+            closeDeclarationBlock();
+        }
+
         appendTableSelectorPart();
         parseDeclarations(TABLE, rules); // table contains is css declarations directly
     }
@@ -113,22 +127,34 @@ public final class TemplateParser {
     }
 
     private void parseDeclarations(String ruleKey, JsonObject declarations) {
-        builder.append(" {\n");
+        openDeclarationBlock();
         for (String property : declarations.keys()) {
-
             if (!ALLOWED_PROPERTIES.get(ruleKey).contains(property)) {
                 throw new IllegalStateException("Unsupported property " + property + " for type " + ruleKey);
             }
 
             String value = Objects.requireNonNull(declarations.getString(property), "null properties are not allowed!");
 
-            builder.append("    ")
-                    .append(mapToCss(property))
-                    .append(": ")
-                    .append(value)
-                    .append(";\n");
+            String cssProperty = mapToCss(property);
+            appendDeclaration(cssProperty, value);
         }
-        builder.append("}\n\n");
+        closeDeclarationBlock();
+    }
+
+    private StringBuilder closeDeclarationBlock() {
+        return builder.append("}\n\n");
+    }
+
+    private void openDeclarationBlock() {
+        builder.append(" {\n");
+    }
+
+    private void appendDeclaration(String cssProperty, String value) {
+        builder.append("    ")
+                .append(cssProperty)
+                .append(": ")
+                .append(value)
+                .append(";\n");
     }
 
     private void appendTableSelectorPart() {
@@ -168,10 +194,8 @@ public final class TemplateParser {
                 return "color";
             case P_WIDTH:
                 return "width";
-            case P_MIN_WIDTH:
-                return "min-width";
-            case P_MAX_WIDTH:
-                return "max-width";
+            case P_HEIGHT:
+                return "height";
             case P_BORDER:
                 return "border";
             default:

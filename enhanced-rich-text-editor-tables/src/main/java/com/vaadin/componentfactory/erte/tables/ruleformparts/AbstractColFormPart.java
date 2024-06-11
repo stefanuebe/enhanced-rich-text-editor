@@ -14,6 +14,7 @@ public abstract class AbstractColFormPart extends AbstractIndexedFormPart {
     }
 
     public AbstractColFormPart(String title) {
+        super(false, true);
         this.title = title;
     }
 
@@ -23,14 +24,7 @@ public abstract class AbstractColFormPart extends AbstractIndexedFormPart {
             add(createPartTitle(title));
         }
 
-        HorizontalLayout rowLayout = createRow(
-                createTextColorField(),
-                createBackgroundColorField(),
-                createWidthField()
-        );
-        rowLayout.setAlignItems(Alignment.BASELINE);
-
-        add(rowLayout);
+        super.initForm(binder);
     }
 
 

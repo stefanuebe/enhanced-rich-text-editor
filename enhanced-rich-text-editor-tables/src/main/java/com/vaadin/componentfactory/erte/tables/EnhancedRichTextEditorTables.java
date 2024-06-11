@@ -123,8 +123,10 @@ public class EnhancedRichTextEditorTables {
 
             } catch (Exception e) {
                 // TODO add error handler or smth.
+                e.printStackTrace();
+
                 Notification
-                        .show("Could not parse changes from template popup. Please check your inputs and inform the admin")
+                        .show("Could not parse changes from template popup. Please check your inputs and inform the admin.")
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

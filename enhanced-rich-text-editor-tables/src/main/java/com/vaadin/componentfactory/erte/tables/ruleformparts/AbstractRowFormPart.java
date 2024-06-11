@@ -16,6 +16,7 @@ public abstract class AbstractRowFormPart extends AbstractIndexedFormPart {
     }
 
     public AbstractRowFormPart(String title) {
+        super(true, false);
         this.title = title;
     }
 
@@ -24,12 +25,8 @@ public abstract class AbstractRowFormPart extends AbstractIndexedFormPart {
         if (title != null) {
             add(createPartTitle(title));
         }
-        HorizontalLayout rowLayout = createRow(
-                createTextColorField(),
-                createBackgroundColorField());
 
-        rowLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
-        add(rowLayout);
+        super.initForm(binder);
     }
 
     @Override

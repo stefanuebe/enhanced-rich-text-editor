@@ -35,10 +35,14 @@ public abstract class RuleFormPart extends VerticalLayout {
 
     abstract void initForm(Binder<JsonObject> binder);
 
-    protected TextField createBorderField() {
-        TextField field = createTextField("Rahmen", P_BORDER);
+    protected TextField createBorderField(String label, String key) {
+        TextField field = createTextField(label, key);
         field.setTooltipText("Expects a valid css border definition, e.g. 1px solid black");
         return field;
+    }
+
+    protected TextField createBorderField() {
+        return createBorderField("Rahmen", P_BORDER);
     }
 
     protected TextField createTextColorField() {
@@ -104,6 +108,9 @@ public abstract class RuleFormPart extends VerticalLayout {
 
     protected IntegerField createWidthField() {
         return createSizeField("Breite", P_WIDTH);
+    }
+    protected IntegerField createHeightField() {
+        return createSizeField("Höhe", P_HEIGHT);
     }
 
     protected static ValueProvider<JsonObject, String> getter(String key) {

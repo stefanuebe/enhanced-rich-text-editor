@@ -8,11 +8,20 @@ import elemental.json.JsonObject;
 
 import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
 
-public abstract class AbstractIndexedFormPart extends RuleFormPart {
+public abstract class AbstractIndexedFormPart extends DefaultPropertiesFormPart {
+
+    public AbstractIndexedFormPart(boolean hasHeight, boolean hasWidth) {
+        super(hasHeight, hasWidth);
+    }
 
     @Override
     protected void readTemplate(JsonObject template, Binder<JsonObject> binder) {
         JsonArray array = template.getArray(getKey());
+        if (array == null) {
+            array = Json.createArray();
+            template.put(getKey(), array);
+        }
+
         String index = getSelectedIndex();
         JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, isIndexFromBottom()); // css nth child are 1 based
         JsonObject rowDeclarations;

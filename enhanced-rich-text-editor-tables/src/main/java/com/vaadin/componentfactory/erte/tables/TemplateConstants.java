@@ -10,9 +10,9 @@ public final class TemplateConstants {
     public static final String P_BACKGROUND = "bgColor";
     public static final String P_COLOR = "color";
     public static final String P_WIDTH = "width";
-    public static final String P_MIN_WIDTH = "minWidth";
-    public static final String P_MAX_WIDTH = "maxWidth";
+    public static final String P_HEIGHT = "height";
     public static final String P_BORDER = "border";
+    public static final String P_BORDER_CELLS = "borderCells";
 
     public static final String TABLE = "table";
     public static final String ROWS = "rows";
@@ -42,9 +42,9 @@ public final class TemplateConstants {
 
     static {
         Map<String, Set<String>> map = new HashMap<>();
-        map.put(TABLE, Set.of(P_BACKGROUND, P_COLOR, P_WIDTH, P_MIN_WIDTH, P_MAX_WIDTH, P_BORDER));
-        map.put(ROWS, Set.of(P_BACKGROUND, P_COLOR, P_BORDER));
-        map.put(COLUMNS, Set.of(P_BACKGROUND, P_COLOR, P_WIDTH, P_MIN_WIDTH, P_MAX_WIDTH, P_BORDER));
+        map.put(TABLE, Set.of(P_BACKGROUND, P_COLOR, P_WIDTH, P_HEIGHT, P_BORDER));
+        map.put(ROWS, Set.of(P_BACKGROUND, P_COLOR, P_HEIGHT, P_BORDER));
+        map.put(COLUMNS, Set.of(P_BACKGROUND, P_COLOR, P_WIDTH, P_BORDER));
         map.put(CELLS, Set.of(P_BACKGROUND, P_COLOR, P_BORDER));
         ALLOWED_PROPERTIES = Collections.unmodifiableMap(map);
     }
