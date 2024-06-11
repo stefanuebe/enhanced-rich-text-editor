@@ -11,7 +11,6 @@ import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.function.SerializableBiConsumer;
-import com.vaadin.flow.function.SerializableConsumer;
 import elemental.json.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.DECLARATIONS;
+import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
 
 public class TemplateDialog extends ToolbarDialog {
 
@@ -120,13 +119,17 @@ public class TemplateDialog extends ToolbarDialog {
 
     private <T extends RuleFormPart> T addPart(T part, Component container) {
         part.addValueChangeListener(event -> {
-            if (templatesChangedCallback != null) {
-                templatesChangedCallback.accept(getTemplates(), event.isFromClient());
-            }
+            notifyTemplateCange(event.isFromClient());
         });
         container.getElement().appendChild(part.getElement());
         parts.add(part);
         return part;
+    }
+
+    private void notifyTemplateCange(boolean fromClient) {
+        if (templatesChangedCallback != null) {
+            templatesChangedCallback.accept(getTemplates(), fromClient);
+        }
     }
 
     public JsonObject getTemplates() {
@@ -227,6 +230,79 @@ public class TemplateDialog extends ToolbarDialog {
 
     protected void setTemplatesChangedCallback(SerializableBiConsumer<JsonObject, Boolean> callback) {
         this.templatesChangedCallback = callback;
+    }
+
+    public void updateRowIndexesOnAdd(boolean before) {
+        updateIndexesOnAdd(ROWS, before);
+    }
+
+    public void updateColIndexesOnAdd(boolean before) {
+        updateIndexesOnAdd(COLUMNS, before);
+    }
+
+    private void updateIndexesOnAdd(String key, boolean before) {
+        if (currentTemplate != null) {
+            // if the item has been added before the current one, we need to increase all indices after ours including us
+            int startingIndex = (ROWS.equals(key) ? currentRowFormPart.getSelectedRow() : currentColFormPart.getSelectedCol()) + 1;
+
+            if (!before) {
+                startingIndex++; // if the item has been added after the current one, we need to increase all indices after ours excluding us
+            }
+
+            JsonArray array = currentTemplate.getArray(key);
+            if (array != null) {
+                for (int i = 0; i < array.length(); i++) {
+                    JsonObject value = array.getObject(i);
+                    String sIndex = value.getString(INDEX);
+                    try {
+                        int index = Integer.parseInt(sIndex);
+                        if (index >= startingIndex) {
+                            value.put(INDEX, String.valueOf(++index));
+                        }
+                    } catch (NumberFormatException nfe) {
+                        // NOOP
+                    }
+
+                }
+
+                notifyTemplateCange(true);
+            }
+        }
+    }
+
+    public void updateRowIndexesOnRemove() {
+        updateIndexesOnRemove(ROWS);
+    }
+
+    public void updateColIndexesOnRemove() {
+        updateIndexesOnRemove(COLUMNS);
+    }
+
+    private void updateIndexesOnRemove(String key) {
+        if (currentTemplate != null) {
+            int startingIndex = (ROWS.equals(key) ? currentRowFormPart.getSelectedRow() : currentColFormPart.getSelectedCol()) + 1;
+
+            JsonArray array = currentTemplate.getArray(key);
+            if (array != null) {
+                for (int i = array.length() - 1; i >= 0 ; i--) {
+                    JsonObject value = array.getObject(i);
+                    String sIndex = value.getString(INDEX);
+                    try {
+                        int index = Integer.parseInt(sIndex);
+                        if (index == startingIndex) {
+                            array.remove(i);
+                        } else if (index > startingIndex) {
+                            value.put(INDEX, String.valueOf(--index));
+                        }
+                    } catch (NumberFormatException nfe) {
+                        // NOOP
+                    }
+
+                }
+
+                notifyTemplateCange(true);
+            }
+        }
     }
 
 //    private void applyOverlayPopupCloseWorkaround(Component component) {

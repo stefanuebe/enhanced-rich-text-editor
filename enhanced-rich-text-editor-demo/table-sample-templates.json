@@ -36,24 +36,6 @@
                     "width": "5rem"
                 }
             }
-        ],
-        "cells": [
-            {
-                "x": 1,
-                "y": 3,
-                "declarations": {
-                    "color": "red",
-                    "bgColor": "yellow"
-                }
-            },
-            {
-                "x": 4,
-                "y": 4,
-                "declarations": {
-                    "color": "blue",
-                    "bgColor": "skyblue"
-                }
-            }
         ]
     },
     "template2": {

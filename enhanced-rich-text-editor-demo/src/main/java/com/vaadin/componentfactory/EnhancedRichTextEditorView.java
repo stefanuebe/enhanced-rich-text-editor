@@ -2,7 +2,6 @@ package com.vaadin.componentfactory;
 
 import com.vaadin.componentfactory.EnhancedRichTextEditor.ToolbarButton;
 import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTables;
-import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -65,13 +64,12 @@ public class EnhancedRichTextEditorView extends DemoView {
             // end-source-example
             Pre pre = new Pre();
 //            pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
-            pre.setHeight("150px");
-            pre.getStyle().set("overflow", "auto").set("font-size", "0.8rem");
+            pre.getStyle().set("font-size", "0.8rem");
 
             rte.setValueChangeMode(ValueChangeMode.EAGER);
             addCard("Rich Text Editor with Table Addon", rte, pre);
 
-            tables.addTemplatesChangedListener(event -> pre.setText(event.getSource().getTemplatesAsCssString()));
+            tables.addTemplatesChangedListener(event -> pre.setText(event.getTableExtension().getTemplatesAsCssString()));
             tables.setTemplates(Json.parse(Files.readString(Path.of("table-sample-templates.json"))));
 
 

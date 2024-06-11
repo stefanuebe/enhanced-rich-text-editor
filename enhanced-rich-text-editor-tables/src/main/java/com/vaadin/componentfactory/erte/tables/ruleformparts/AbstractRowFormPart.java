@@ -1,12 +1,9 @@
 package com.vaadin.componentfactory.erte.tables.ruleformparts;
 
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import elemental.json.JsonObject;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
+import static com.vaadin.componentfactory.erte.tables.TemplateConstants.ROWS;
 
 public abstract class AbstractRowFormPart extends AbstractIndexedFormPart {
     private final String title;

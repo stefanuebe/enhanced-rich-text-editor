@@ -20,4 +20,8 @@ public class CurrentColFormPart extends AbstractColFormPart {
             this.selectedCol = column;
         }
     }
+
+    public int getSelectedCol() {
+        return selectedCol;
+    }
 }

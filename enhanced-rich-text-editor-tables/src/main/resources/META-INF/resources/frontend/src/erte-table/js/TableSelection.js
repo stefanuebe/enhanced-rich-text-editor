@@ -1,3 +1,5 @@
+import TableTrick from "./TableTrick";
+
 class TableSelection {
   static focusedCell = null;
   static isMouseDown = false;
@@ -100,13 +102,48 @@ class TableSelection {
     }
   }
 
-  static selectionChange(quill, range = null, oldRange = null) {
+  static cellSelectionChange(quill, range = null, oldRange = null) {
+    const rte = TableTrick.getRichTextEditorInstance(quill);
+    let selectedCell = quill.__selectedTableCell;
+    let selectedRow = quill.__selectedTableRow;
 
-    // just assure, that our quill is already attached
-    const host = quill?.root?.getRootNode()?.host;
-    if (host?.tagName !== "VCF-ENHANCED-RICH-TEXT-EDITOR") {
-      throw new Error("invalid dom state", host);
+    // lookup the current column and row index
+    let colIndex, rowIndex;
+    if (quill.__selectedTable && selectedRow) {
+      const table = quill.__selectedTable;
+      for (let i = 0; i < table.childNodes.length && !rowIndex; i++) {
+        if (table.childNodes[i] === selectedRow) {
+          rowIndex = i;
+        }
+      }
+
+      if (selectedCell) {
+        for (let i = 0; i < selectedRow.childNodes.length && !colIndex; i++) {
+          if (selectedRow.childNodes[i] === selectedCell) {
+            colIndex = i;
+          }
+        }
+      }
     }
+
+    if (quill.__selectedTableRowIndex !== rowIndex || quill.__selectedTableColIndex !== colIndex) {
+      quill.__selectedTableRowIndex = rowIndex;
+      quill.__selectedTableColIndex = colIndex;
+
+      rte.dispatchEvent(new CustomEvent("table-cell-changed", {
+        detail: {
+          colIndex,
+          rowIndex
+        }
+      }));
+    }
+
+  }
+
+
+
+  static selectionChange(quill, range = null, oldRange = null) {
+    let host = TableTrick.getRichTextEditorInstance(quill);
 
     // check, if the current "global" selection is in the editor, otherwise do not fire a table selection event,
     // as it will result in "null" for any clicks outside the editor:
@@ -146,34 +183,15 @@ class TableSelection {
       quill.__selectedTableCell = selectedCell;
       quill.__selectedTableRow = selectedRow;
 
-      // lookup the current column and row index
-      let colIndex, rowIndex;
-      if (quill.__selectedTable && selectedRow) {
-        const table = quill.__selectedTable;
-        for (let i = 0; i < table.childNodes.length && !rowIndex; i++) {
-          if (table.childNodes[i] === selectedRow) {
-            rowIndex = i;
-          }
-        }
-
-        if (selectedCell) {
-          for (let i = 0; i < selectedRow.childNodes.length && !colIndex; i++) {
-            if (selectedRow.childNodes[i] === selectedCell) {
-              colIndex = i;
-            }
-          }
-        }
-      }
-
       host.dispatchEvent(new CustomEvent("table-selected", {
         detail: {
           selected: isInTable,
           cellSelectionActive: TableSelection.selectionStartElement != null,
-          template: tableTemplate,
-          colIndex,
-          rowIndex
+          template: tableTemplate
         }
       }));
+
+      TableSelection.cellSelectionChange(quill);
 
       if (!isInTable && quill.table.isInTable) {
         quill.table.isInTable = false;

@@ -17,4 +17,8 @@ public class CurrentRowFormPart extends AbstractRowFormPart {
             this.selectedRow = row;
         }
     }
+
+    public int getSelectedRow() {
+        return selectedRow;
+    }
 }
