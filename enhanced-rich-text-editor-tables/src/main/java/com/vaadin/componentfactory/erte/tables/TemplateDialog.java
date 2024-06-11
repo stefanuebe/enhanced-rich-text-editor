@@ -203,6 +203,16 @@ public class TemplateDialog extends ToolbarDialog {
         currentColFormPart.readTemplate(currentTemplate);
     }
 
+    /**
+     * Allows to specifically enable / disable the "current selection" form parts. This might be used, if there
+     * is a multiline selection or similar.
+     * @param enabled enable or disable
+     */
+    public void setCurrentPartsEnabled(boolean enabled) {
+        currentColFormPart.setEnabled(enabled);
+        currentRowFormPart.setEnabled(enabled);
+    }
+
     public void setActiveTemplate(@Nullable String template) {
         templateField.setValue(template);
     }

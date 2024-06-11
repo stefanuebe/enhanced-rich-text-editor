@@ -150,22 +150,20 @@ class TableSelection {
       let colIndex, rowIndex;
       if (quill.__selectedTable && selectedRow) {
         const table = quill.__selectedTable;
-        for(let i = 0; i < table.childNodes.length && !rowIndex; i++) {
-          if(table.childNodes[i] === selectedRow) {
+        for (let i = 0; i < table.childNodes.length && !rowIndex; i++) {
+          if (table.childNodes[i] === selectedRow) {
             rowIndex = i;
           }
         }
 
         if (selectedCell) {
-          for(let i = 0; i < selectedRow.childNodes.length && !colIndex; i++) {
-            if(selectedRow.childNodes[i] === selectedCell) {
+          for (let i = 0; i < selectedRow.childNodes.length && !colIndex; i++) {
+            if (selectedRow.childNodes[i] === selectedCell) {
               colIndex = i;
             }
           }
         }
       }
-
-      console.warn(rowIndex, colIndex);
 
       host.dispatchEvent(new CustomEvent("table-selected", {
         detail: {

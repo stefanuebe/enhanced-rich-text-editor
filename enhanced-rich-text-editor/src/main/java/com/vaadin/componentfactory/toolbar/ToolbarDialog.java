@@ -17,12 +17,21 @@ public class ToolbarDialog extends Dialog {
     public ToolbarDialog(ToolbarSwitch toolbarSwitch) {
         this.toolbarSwitch = toolbarSwitch;
         toolbarSwitch.addActiveChangedListener(event -> {
-            setOpened(event.isActive());
+            if (event.isFromClient()) {
+                setOpened(event.isActive());
+            }
         });
 
         if (toolbarSwitch.isActive()) {
             setOpened(true);
         }
+
+        addOpenedChangeListener(event -> {
+            toolbarSwitch.setActive(event.isOpened());
+            if (!event.isOpened()) {
+                toolbarSwitch.focus();
+            }
+        });
 
         // default settings
         setCloseOnOutsideClick(false);
@@ -57,8 +66,6 @@ public class ToolbarDialog extends Dialog {
         focusOnOpenTargetRegistration = addOpenedChangeListener(event -> {
             if (event.isOpened()) {
                 component.getElement().callJsFunction("focus");
-            } else {
-                toolbarSwitch.focus();
             }
         });
     }

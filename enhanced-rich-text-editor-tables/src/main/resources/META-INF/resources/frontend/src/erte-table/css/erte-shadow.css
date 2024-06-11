@@ -1,12 +1,13 @@
-.ql-editor table {
+table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     overflow:hidden;
     white-space: nowrap;
+
 }
 
-.ql-editor table td {
+table td {
     border: 1px solid black;
     padding: 2px 5px;
     height: 25px;
@@ -18,39 +19,39 @@
     border: none !important;
 }
 
-.ql-editor table td[rowspan="2"] {
+table td[rowspan="2"] {
     height: 50px;
 }
 
-.ql-editor table td[rowspan="3"] {
+table td[rowspan="3"] {
     height: 75px;
 }
 
-.ql-editor table td[rowspan="4"] {
+table td[rowspan="4"] {
     height: 100px;
 }
 
-.ql-editor table td[rowspan="5"] {
+table td[rowspan="5"] {
     height: 125px;
 }
 
-.ql-editor table td[rowspan="6"] {
+table td[rowspan="6"] {
     height: 150px;
 }
 
-.ql-editor table td[rowspan="7"] {
+table td[rowspan="7"] {
     height: 175px;
 }
 
-.ql-editor table td[rowspan="8"] {
+table td[rowspan="8"] {
     height: 200px;
 }
 
-.ql-editor table td[rowspan="9"] {
+table td[rowspan="9"] {
     height: 225px;
 }
 
-.ql-editor table td[merge_id] {
+table td[merge_id] {
     display: none;
 }
 
@@ -356,6 +357,6 @@
     content: "5x5";
 }
 
-.ql-editor table td.ql-cell-selected {
+table td.ql-cell-selected {
     background-image: linear-gradient(var(--lumo-primary-color-10pct, #cce0f8), var(--lumo-primary-color-10pct, #cce0f8));
 }

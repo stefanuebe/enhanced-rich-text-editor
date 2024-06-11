@@ -110,6 +110,7 @@ public class EnhancedRichTextEditorTables {
             if (event.getColIndex() != null) {
                 stylesPopup.setSelectedColumn(event.getColIndex());
             }
+            stylesPopup.setCurrentPartsEnabled(!cellSelectionActive);
         });
 
         stylesPopup.setTemplateSelectedCallback((template, fromClient) -> setTemplateForCurrentTable(template, fromClient));

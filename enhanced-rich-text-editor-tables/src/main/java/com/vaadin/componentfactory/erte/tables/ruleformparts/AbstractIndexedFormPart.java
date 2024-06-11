@@ -23,11 +23,15 @@ public abstract class AbstractIndexedFormPart extends DefaultPropertiesFormPart 
         }
 
         String index = getSelectedIndex();
-        JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, isIndexFromBottom()); // css nth child are 1 based
+        boolean indexFromBottom = isIndexFromBottom();
+        JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, indexFromBottom); // css nth child are 1 based
         JsonObject rowDeclarations;
         if (rowObject == null) {
             rowObject = Json.createObject();
             rowObject.put(INDEX, index);
+            if (indexFromBottom) {
+                rowObject.put(FROM_BOTTOM, true);
+            }
             rowDeclarations = Json.createObject();
             rowObject.put(DECLARATIONS, rowDeclarations);
             array.set(array.length(), rowObject);

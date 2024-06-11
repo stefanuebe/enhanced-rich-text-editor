@@ -60,7 +60,7 @@
         "name": "Alternating Rows",
         "rows": [
             {
-                "index": "2n",
+                "index": "even",
                 "declarations" : {
                     "bgColor": "whitesmoke"
                 }

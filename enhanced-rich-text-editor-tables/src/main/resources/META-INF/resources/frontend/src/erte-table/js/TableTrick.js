@@ -120,8 +120,8 @@ export default class TableTrick {
       if (direction !== 'before' && td.domNode.getAttribute('colspan')) {
         // for direction = after, if the cell is merged, append column at the end of merged cell (not after the first cell)
         const endCell = td.parent.domNode.children[
-          Array.prototype.indexOf.call(td.parent.domNode.children, td.domNode) + Number.parseInt(td.domNode.getAttribute('colspan')) - 1
-        ];
+        Array.prototype.indexOf.call(td.parent.domNode.children, td.domNode) + Number.parseInt(td.domNode.getAttribute('colspan')) - 1
+            ];
         if (endCell) {
           td = Parchment.find(endCell);
         }
@@ -614,8 +614,8 @@ export default class TableTrick {
 
   static borderToggle(quill, hide) {
     const table = TableSelection.selectionStartElement?.closest('table') ||
-      (TableTrick.find_td(quill)?.domNode.closest('table')) ||
-      null;
+        (TableTrick.find_td(quill)?.domNode.closest('table')) ||
+        null;
 
     if (!table) return;
 
@@ -635,10 +635,11 @@ export default class TableTrick {
   }
 
   static table_handler(value, quill) {
+    debugger;
     // Check if the selection is for the same Quill instance, otherwise reset selection
     if (
-      (TableSelection.selectionStartElement && !quill.container.contains(TableSelection.selectionStartElement)) ||
-      (TableSelection.selectionEndElement && !quill.container.contains(TableSelection.selectionEndElement))
+        (TableSelection.selectionStartElement && !quill.container.contains(TableSelection.selectionStartElement)) ||
+        (TableSelection.selectionEndElement && !quill.container.contains(TableSelection.selectionEndElement))
     ) {
       TableSelection.selectionStartElement = TableSelection.selectionEndElement = null;
       TableSelection.resetSelection();
@@ -682,18 +683,18 @@ export default class TableTrick {
         case 'merge-selection':
           TableTrick.mergeSelection(quill);
           break;
-        // case 'remove-cell':
-        //   TableTrick.removeCell(quill);
-        //   break;
+          // case 'remove-cell':
+          //   TableTrick.removeCell(quill);
+          //   break;
         case 'remove-selection':
           TableTrick.removeSelection(quill);
           break;
-        // case 'hide-border':
-        //   TableTrick.borderToggle(quill, true);
-        //   break;
-        // case 'show-border':
-        //   TableTrick.borderToggle(quill, false);
-        //   break;
+          // case 'hide-border':
+          //   TableTrick.borderToggle(quill, true);
+          //   break;
+          // case 'show-border':
+          //   TableTrick.borderToggle(quill, false);
+          //   break;
         case 'undo':
           if (quill.history.stack.undo.length) {
             const entry = quill.history.stack.undo[quill.history.stack.undo.length - 1];
@@ -744,6 +745,8 @@ export default class TableTrick {
           }
           return true;
       }
+
+      // TODO fire a proper event, that informs about new indices, but does
     }
   }
 }

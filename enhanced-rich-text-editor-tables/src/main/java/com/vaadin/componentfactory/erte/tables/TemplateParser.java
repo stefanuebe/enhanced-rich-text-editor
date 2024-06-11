@@ -163,7 +163,8 @@ public final class TemplateParser {
 
     private void appendIndex(JsonObject declarationDef) {
         if (declarationDef.hasKey(INDEX)) {
-            String nth = declarationDef.hasKey(FROM_BOTTOM) && declarationDef.getBoolean(FROM_BOTTOM)
+            boolean fromBottom = declarationDef.hasKey(FROM_BOTTOM) && declarationDef.getBoolean(FROM_BOTTOM);
+            String nth = fromBottom
                     ? "nth-last-of-type"
                     : "nth-of-type";
 

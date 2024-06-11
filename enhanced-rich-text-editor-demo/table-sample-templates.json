@@ -7,7 +7,7 @@
         },
         "rows": [
             {
-                "index": "1",
+                "index": "0n+1",
                 "declarations" : {
                     "color": "white",
                     "bgColor": "#333"
@@ -19,7 +19,7 @@
                     "bgColor": "lightgray"
                 }
             },{
-                "index": "1",
+                "index": "0n+1",
                 "last": true,
                 "declarations" : {
                     "color": "white",
@@ -60,9 +60,29 @@
         "name": "Alternating Rows",
         "rows": [
             {
-                "index": "2n",
+                "index": "even",
                 "declarations" : {
                     "bgColor": "whitesmoke"
+                }
+            }
+        ]
+    },
+    "template3": {
+        "name": "Modern Table",
+        "table": {
+            "borderCells": "0 none transparent"
+        },
+        "rows": [
+            {
+                "index": "even",
+                "declarations" : {
+                    "bgColor": "whitesmoke"
+                }
+            }, {
+                "index": "0n+1",
+                "declarations" : {
+                    "bgColor": "gray",
+                    "color": "white"
                 }
             }
         ]
