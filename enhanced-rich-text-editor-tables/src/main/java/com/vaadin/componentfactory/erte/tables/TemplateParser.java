@@ -30,33 +30,36 @@ public final class TemplateParser {
 
     public String toCss() {
         builder = new StringBuilder();
-        for (String templateName : templates.keys()) {
-            if (!isValidTemplateName(templateName)) {
-                throw new IllegalStateException(templateName + " is not a legal template name. It must match " + PATTERN_TEMPLATE_NAME.pattern());
-            }
+        if (templates != null) {
 
-            currentTemplateName = templateName;
+            for (String templateName : templates.keys()) {
+                if (!isValidTemplateName(templateName)) {
+                    throw new IllegalStateException(templateName + " is not a legal template name. It must match " + PATTERN_TEMPLATE_NAME.pattern());
+                }
 
-            JsonObject rules = templates.getObject(templateName);
+                currentTemplateName = templateName;
 
-            // check the rules for the different selectors
-            // we could do that in a loop, but by doing it manually we can also
-            // specify the order of css rules in the resulting sheet (which has an effect on the resulting look)
-            if (rules.hasKey(TABLE)) {
-                parseTable(rules.getObject(TABLE));
-            }
+                JsonObject rules = templates.getObject(templateName);
 
-            // cols before rows makes the rows the overriding style when styles "overlap"
-            if (rules.hasKey(COLUMNS)) {
-                parseCols(rules.getArray(COLUMNS));
-            }
+                // check the rules for the different selectors
+                // we could do that in a loop, but by doing it manually we can also
+                // specify the order of css rules in the resulting sheet (which has an effect on the resulting look)
+                if (rules.hasKey(TABLE)) {
+                    parseTable(rules.getObject(TABLE));
+                }
 
-            if (rules.hasKey(ROWS)) {
-                parseRows(rules.getArray(ROWS));
-            }
+                // cols before rows makes the rows the overriding style when styles "overlap"
+                if (rules.hasKey(COLUMNS)) {
+                    parseCols(rules.getArray(COLUMNS));
+                }
 
-            if (rules.hasKey(CELLS)) {
-                parseCells(rules.getArray(CELLS));
+                if (rules.hasKey(ROWS)) {
+                    parseRows(rules.getArray(ROWS));
+                }
+
+                if (rules.hasKey(CELLS)) {
+                    parseCells(rules.getArray(CELLS));
+                }
             }
         }
         return builder.toString().trim();
@@ -134,7 +137,7 @@ public final class TemplateParser {
 
     private void appendIndex(JsonObject declarationDef) {
         if (declarationDef.hasKey(INDEX)) {
-            String nth = declarationDef.hasKey(LAST) && declarationDef.getBoolean(LAST)
+            String nth = declarationDef.hasKey(FROM_BOTTOM) && declarationDef.getBoolean(FROM_BOTTOM)
                     ? "nth-last-of-type"
                     : "nth-of-type";
 

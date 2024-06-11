@@ -23,7 +23,7 @@ public final class TemplateConstants {
     public static final String CELL_Y = "y";
     public static final String INDEX = "index";
     public static final String NAME = "name";
-    public static final String LAST = "last";
+    public static final String FROM_BOTTOM = "last";
     public static final String DECLARATIONS = "declarations";
 
     public static final Pattern PATTERN_TEMPLATE_NAME = Pattern.compile("[A-Za-z][A-Za-z0-9\\-]*");

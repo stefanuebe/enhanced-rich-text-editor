@@ -59,20 +59,22 @@ public class EnhancedRichTextEditorView extends DemoView {
 
         // assure test files can be read
         try {
-            tables.setTemplates(Json.parse(Files.readString(Path.of("table-sample-templates.json"))));
 
             rte.setMaxHeight("500px");
 
             // end-source-example
             Pre pre = new Pre();
-            pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
+//            pre.setWhiteSpace(HasText.WhiteSpace.NORMAL);
             pre.setHeight("150px");
-            pre.getStyle().set("overflow", "auto");
+            pre.getStyle().set("overflow", "auto").set("font-size", "0.8rem");
+
             rte.setValueChangeMode(ValueChangeMode.EAGER);
             addCard("Rich Text Editor with Table Addon", rte, pre);
 
+            tables.addTemplatesChangedListener(event -> pre.setText(event.getSource().getTemplatesAsCssString()));
+            tables.setTemplates(Json.parse(Files.readString(Path.of("table-sample-templates.json"))));
 
-            rte.addValueChangeListener(event -> pre.setText(event.getValue()));
+
             rte.setValue(Files.readString(Path.of("table-sample-delta.json")));
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,23 +1,11 @@
 package com.vaadin.componentfactory.erte.tables.ruleformparts;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.COLUMNS;
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.ROWS;
-
 public class CurrentRowFormPart extends AbstractRowFormPart {
     private int selectedRow;
 
-    public CurrentRowFormPart() {
-        super("Aktuelle Zeile");
-    }
-
     @Override
-    protected int getSelectedIndex() {
-        return selectedRow;
-    }
-
-    @Override
-    protected String getKey() {
-        return ROWS;
+    protected String getSelectedIndex() {
+        return String.valueOf(selectedRow + 1);
     }
 
     public void setSelectedRow(int row) {

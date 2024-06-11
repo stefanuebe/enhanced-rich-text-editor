@@ -13,14 +13,15 @@ public abstract class AbstractIndexedFormPart extends RuleFormPart {
     @Override
     protected void readTemplate(JsonObject template, Binder<JsonObject> binder) {
         JsonArray array = template.getArray(getKey());
-        String index = String.valueOf(getSelectedIndex() + 1);
-        JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, false); // css nth child are 1 based
+        String index = getSelectedIndex();
+        JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, isIndexFromBottom()); // css nth child are 1 based
         JsonObject rowDeclarations;
         if (rowObject == null) {
             rowObject = Json.createObject();
             rowObject.put(INDEX, index);
             rowDeclarations = Json.createObject();
             rowObject.put(DECLARATIONS, rowDeclarations);
+            array.set(array.length(), rowObject);
         } else {
             rowDeclarations = rowObject.getObject(DECLARATIONS);
         }
@@ -29,5 +30,9 @@ public abstract class AbstractIndexedFormPart extends RuleFormPart {
 
     protected abstract String getKey();
 
-    protected abstract int getSelectedIndex();
+    protected abstract String getSelectedIndex();
+
+    protected boolean isIndexFromBottom() {
+        return false;
+    }
 }

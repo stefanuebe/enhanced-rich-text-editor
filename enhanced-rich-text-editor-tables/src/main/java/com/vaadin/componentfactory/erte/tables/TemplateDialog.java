@@ -1,17 +1,17 @@
 package com.vaadin.componentfactory.erte.tables;
 
-import com.vaadin.componentfactory.erte.tables.ruleformparts.CurrentColFormPart;
-import com.vaadin.componentfactory.erte.tables.ruleformparts.CurrentRowFormPart;
-import com.vaadin.componentfactory.erte.tables.ruleformparts.RuleFormPart;
-import com.vaadin.componentfactory.erte.tables.ruleformparts.TableFormPart;
-import com.vaadin.componentfactory.toolbar.ToolbarPopup;
+import com.vaadin.componentfactory.erte.tables.ruleformparts.*;
+import com.vaadin.componentfactory.toolbar.ToolbarDialog;
 import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.function.SerializableConsumer;
 import elemental.json.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,10 +23,14 @@ import java.util.Optional;
 
 import static com.vaadin.componentfactory.erte.tables.TemplateConstants.DECLARATIONS;
 
-public class TemplatePopup extends ToolbarPopup {
+public class TemplateDialog extends ToolbarDialog {
 
     private final VerticalLayout layout;
     private final ComboBox<String> templateField;
+    private final FixedIndexRowFormPart headerRowFormPart;
+    private final FixedIndexRowFormPart oddRowsFormPart;
+    private final FixedIndexRowFormPart evenRowsFormPart;
+    private final FixedIndexRowFormPart footerRowFormPart;
     private JsonObject currentTemplate;
     private JsonObject templates = Json.createObject();
     private TableFormPart tableFormPart;
@@ -34,19 +38,36 @@ public class TemplatePopup extends ToolbarPopup {
     private CurrentColFormPart currentColFormPart;
 
     private final List<RuleFormPart> parts = new ArrayList<>();
+    private SerializableBiConsumer<String, Boolean> templateSelectedCallback;
+    private SerializableBiConsumer<JsonObject, Boolean> templatesChangedCallback;
 
-    public TemplatePopup(ToolbarSwitch referencedSwitch) {
+    public TemplateDialog(ToolbarSwitch referencedSwitch) {
         super(referencedSwitch);
-        setCloseOnClick(false);
+
+        setHeaderTitle("Formatvorlagen");
+        Button button = new Button(VaadinIcon.CLOSE.create(), event -> close());
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        getHeader().add(button);
 
         templateField = new ComboBox<>();
-        applyOverlayPopupCloseWorkaround(templateField);
 
         layout = new VerticalLayout(templateField);
         layout.setSpacing(false);
-        tableFormPart = addPart(new TableFormPart());
-        currentRowFormPart = addPart(new CurrentRowFormPart());
-        currentColFormPart = addPart(new CurrentColFormPart());
+
+        Details tableDetails = addPartDetails("Tabelle");
+        tableFormPart = addPart(new TableFormPart(), tableDetails);
+
+        Details currentRowDetails = addPartDetails("Aktuelle Zeile");
+        currentRowFormPart = addPart(new CurrentRowFormPart(), currentRowDetails);
+
+        Details currentColDetails = addPartDetails("Aktuelle Spalte");
+        currentColFormPart = addPart(new CurrentColFormPart(), currentColDetails);
+
+        Details fixedRowsDetails = addPartDetails("Spezielle Zeilen", false);
+        headerRowFormPart = addPart(new FixedIndexRowFormPart("Kopfzeile", "1"), fixedRowsDetails);
+        footerRowFormPart = addPart(new FixedIndexRowFormPart("Fußzeile", "1", true), fixedRowsDetails);
+        evenRowsFormPart = addPart(new FixedIndexRowFormPart("Gerade Zeilen", "2n"), fixedRowsDetails);
+        oddRowsFormPart = addPart(new FixedIndexRowFormPart("Ungerade Zeilen", "2n+1"), fixedRowsDetails);
         add(layout);
 
         templateField.addValueChangeListener(event -> {
@@ -61,23 +82,49 @@ public class TemplatePopup extends ToolbarPopup {
                 parts.forEach(ruleFormPart -> ruleFormPart.readTemplate(currentTemplate));
             }
 
-            fireEvent(new TemplateSelectedEvent(this, event.isFromClient(), value));
+            if(templateSelectedCallback != null) {
+                templateSelectedCallback.accept(value, event.isFromClient());
+            }
         });
         setFocusOnOpenTarget(templateField);
 
+        addOpenedChangeListener(event -> {
+            if (event.isOpened()) {
+                getElement().executeJs("const {left, top, width, height} = $0.getBoundingClientRect();" +
+                                       "this.$.overlay.$.overlay.style.position = 'absolute';" +
+                                       "this.$.overlay.$.overlay.style.left = left + width + 'px';",
+                        getToolbarSwitch());
+            }
+        });
+
 
         // Workaround for https://github.com/vaadin-component-factory/vcf-popup/issues/16
-        getElement().executeJs("this.addEventListener('popup-open-changed', e => {" +
-                               "    if(!e.detail.value && this.__stayOpen) {" +
-                               "        this.opened = true;" +
-                               "        delete this.__stayOpen;" +
-                               "    }" +
-                               "});");
+//        getElement().executeJs("this.addEventListener('popup-open-changed', e => {" +
+//                               "    if(!e.detail.value && this.__stayOpen) {" +
+//                               "        this.opened = true;" +
+//                               "        delete this.__stayOpen;" +
+//                               "    }" +
+//                               "});");
     }
 
-    private <T extends RuleFormPart> T addPart(T part) {
-        part.addValueChangeListener(event -> fireEvent(new TemplatesChangedEvent(this, event.isFromClient())));
-        layout.add(part);
+    private Details addPartDetails(String title) {
+        return addPartDetails(title, true);
+    }
+
+    private Details addPartDetails(String title, boolean initiallyOpened) {
+        Details details = new Details(title);
+        details.setOpened(initiallyOpened);
+        layout.add(details);
+        return details;
+    }
+
+    private <T extends RuleFormPart> T addPart(T part, Component container) {
+        part.addValueChangeListener(event -> {
+            if (templatesChangedCallback != null) {
+                templatesChangedCallback.accept(getTemplates(), event.isFromClient());
+            }
+        });
+        container.getElement().appendChild(part.getElement());
         parts.add(part);
         return part;
     }
@@ -164,40 +211,21 @@ public class TemplatePopup extends ToolbarPopup {
         return templateField.getOptionalValue();
     }
 
-    private void applyOverlayPopupCloseWorkaround(Component component) {
-        component.getElement().executeJs("this.addEventListener('opened-changed', e => {" +
-                                         "if(e.detail.value) {  " +
-                                         "    $0.__stayOpen = true;" +
-                                         "}" +
-                                         "});", this);
+    protected void setTemplateSelectedCallback(SerializableBiConsumer<String, Boolean> callback) {
+        this.templateSelectedCallback = callback;
     }
 
-    public Registration addTemplatesChangedListener(ComponentEventListener<TemplatesChangedEvent> listener) {
-        return addListener(TemplatesChangedEvent.class, listener);
+    protected void setTemplatesChangedCallback(SerializableBiConsumer<JsonObject, Boolean> callback) {
+        this.templatesChangedCallback = callback;
     }
 
-    public Registration addTemplateSelectedListener(ComponentEventListener<TemplateSelectedEvent> listener) {
-        return addListener(TemplateSelectedEvent.class, listener);
-    }
-
-    public static class TemplateSelectedEvent extends ComponentEvent<TemplatePopup> {
-        private final String template;
-
-        public TemplateSelectedEvent(TemplatePopup source, boolean fromClient, String template) {
-            super(source, fromClient);
-            this.template = template;
-        }
-
-        public String getTemplate() {
-            return template;
-        }
-    }
-
-    public static class TemplatesChangedEvent extends ComponentEvent<TemplatePopup> {
-        public TemplatesChangedEvent(TemplatePopup source, boolean fromClient) {
-            super(source, fromClient);
-        }
-    }
+//    private void applyOverlayPopupCloseWorkaround(Component component) {
+//        component.getElement().executeJs("this.addEventListener('opened-changed', e => {" +
+//                                         "if(e.detail.value) {  " +
+//                                         "    $0.__stayOpen = true;" +
+//                                         "}" +
+//                                         "});", this);
+//    }
 
 
 }

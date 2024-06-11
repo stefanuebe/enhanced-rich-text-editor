@@ -5,19 +5,11 @@ import static com.vaadin.componentfactory.erte.tables.TemplateConstants.COLUMNS;
 public class CurrentColFormPart extends AbstractColFormPart {
     private int selectedCol;
 
-    public CurrentColFormPart() {
-        super("Aktuelle Spalte");
+    @Override
+    protected String getSelectedIndex() {
+        return String.valueOf(selectedCol + 1);
     }
 
-    @Override
-    protected int getSelectedIndex() {
-        return selectedCol;
-    }
-
-    @Override
-    protected String getKey() {
-        return COLUMNS;
-    }
 
     public void setSelectedColumn(int column) {
         if (column < 0) {

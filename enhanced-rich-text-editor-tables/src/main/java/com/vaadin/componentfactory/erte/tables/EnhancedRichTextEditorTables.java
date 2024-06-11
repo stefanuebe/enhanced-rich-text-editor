@@ -1,14 +1,15 @@
 package com.vaadin.componentfactory.erte.tables;
 
 import com.vaadin.componentfactory.EnhancedRichTextEditor;
-import com.vaadin.componentfactory.EnhancedRichTextEditor.RichTextEditorI18n;
 import com.vaadin.componentfactory.toolbar.ToolbarPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSelectPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Hr;
@@ -17,21 +18,30 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 import javax.annotation.Nullable;
+import java.util.EventObject;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 @NpmPackage(value = "quill-delta", version = "5.1.0")
 @JsModule("./src/erte-table/connector.js")
+@CssImport(value = "./src/erte-table/css/erte-shadow.css", themeFor = "vcf-enhanced-rich-text-editor")
+@CssImport(value = "./src/erte-table/css/toolbar.css")
 public class EnhancedRichTextEditorTables {
 
     private static final String SCRIPTS = "window.Vaadin.Flow._enhanced_rich_text_editor.";
     private static final String SCRIPTS_TABLE = "window.Vaadin.Flow._enhanced_rich_text_editor.tables.";
 
     private final EnhancedRichTextEditor rte;
-    private TemplatePopup stylesPopup;
+    private TemplateDialog stylesPopup;
+
+    private final List<SerializableConsumer<TemplateSelectedEvent>> templateSelectedListeners = new LinkedList<>();
+    private final List<SerializableConsumer<TemplatesChangedEvent>> templateChangedListeners = new LinkedList<>();
 
     public EnhancedRichTextEditorTables(EnhancedRichTextEditor rte) {
         this.rte = rte;
@@ -82,7 +92,7 @@ public class EnhancedRichTextEditorTables {
 
         ToolbarSwitch stylesButton = new ToolbarSwitch(VaadinIcon.TABLE, VaadinIcon.EYE);
         stylesButton.setEnabled(false);
-        stylesPopup = new TemplatePopup(stylesButton);
+        stylesPopup = new TemplateDialog(stylesButton);
 
         ComponentUtil.addListener(rte, TableSelectedEvent.class, event -> {
             insertButton.setEnabled(!event.isSelected());
@@ -102,12 +112,15 @@ public class EnhancedRichTextEditorTables {
             }
         });
 
-        stylesPopup.addTemplateSelectedListener(event -> setTemplateForCurrentTable(event.getTemplate()));
-        stylesPopup.addTemplatesChangedListener(event -> {
+        stylesPopup.setTemplateSelectedCallback((template, fromClient) -> setTemplateForCurrentTable(template, fromClient));
+        stylesPopup.setTemplatesChangedCallback((templates, fromClient) -> {
             try {
-                JsonObject templates = event.getSource().getTemplates();
                 String string = TemplateParser.parse(templates);
                 setClientSideStyles(string);
+
+                templateChangedListeners.forEach(c -> c.accept(new TemplatesChangedEvent(this, true, templates, string)));
+
+
             } catch (Exception e) {
                 // TODO add error handler or smth.
                 Notification
@@ -122,9 +135,17 @@ public class EnhancedRichTextEditorTables {
     public void setTemplates(JsonObject jsonObject) {
         // TODO allow setting of templates without enabled styles popup
         Objects.requireNonNull(stylesPopup).setTemplates(jsonObject);
+        String cssString = TemplateParser.parse(jsonObject);
+        setClientSideStyles(cssString);
+        templateChangedListeners.forEach(c -> c.accept(new TemplatesChangedEvent(this, false, jsonObject, cssString)));
+    }
 
-        setClientSideStyles(TemplateParser.parse(jsonObject));
+    public JsonObject getTemplates() {
+        return stylesPopup.getTemplates();
+    }
 
+    public String getTemplatesAsCssString() {
+        return TemplateParser.parse(getTemplates());
     }
 
     /**
@@ -146,7 +167,13 @@ public class EnhancedRichTextEditorTables {
     }
 
     public void setTemplateForCurrentTable(@Nullable String template) {
+        setTemplateForCurrentTable(template, false);
+    }
+
+    private void setTemplateForCurrentTable(@Nullable String template, boolean fromClient) {
         rte.getElement().executeJs(SCRIPTS_TABLE + "setTemplate(this, $0)", template);
+
+        templateSelectedListeners.forEach(c -> c.accept(new TemplateSelectedEvent(this, fromClient, template)));
     }
 
     public void executeTableAction(String action) {
@@ -183,11 +210,69 @@ public class EnhancedRichTextEditorTables {
         return field;
     }
 
-    public Registration addTemplatesChangedListener(ComponentEventListener<TemplatePopup.TemplatesChangedEvent> listener) {
-        return stylesPopup.addTemplatesChangedListener(listener);
+    public Registration addTemplatesChangedListener(SerializableConsumer<TemplatesChangedEvent> listener) {
+        return Registration.addAndRemove(templateChangedListeners, listener);
     }
 
-    public Registration addTemplateSelectedListener(ComponentEventListener<TemplatePopup.TemplateSelectedEvent> listener) {
-        return stylesPopup.addTemplateSelectedListener(listener);
+    public Registration addTemplateSelectedListener(SerializableConsumer<TemplateSelectedEvent> listener) {
+        return Registration.addAndRemove(templateSelectedListeners, listener);
+    }
+
+    public static class TemplateSelectedEvent extends EventObject {
+        private final boolean fromClient;
+        private final String template;
+
+        public TemplateSelectedEvent(EnhancedRichTextEditorTables source, boolean fromClient, String template) {
+            super(source);
+            this.fromClient = fromClient;
+            this.template = template;
+        }
+
+        public String getTemplate() {
+            return template;
+        }
+
+        public boolean isFromClient() {
+            return fromClient;
+        }
+
+        public EnhancedRichTextEditorTables getSource() {
+            return (EnhancedRichTextEditorTables) super.getSource();
+        }
+    }
+
+    public static class TemplatesChangedEvent extends EventObject {
+        private final boolean fromClient;
+        private final JsonObject templates;
+        private final String cssString;
+
+        public TemplatesChangedEvent(EnhancedRichTextEditorTables source, boolean fromClient, JsonObject templates, String cssString) {
+            super(source);
+            this.fromClient = fromClient;
+            this.templates = templates;
+            this.cssString = cssString;
+        }
+
+        public EnhancedRichTextEditorTables getSource() {
+            return (EnhancedRichTextEditorTables) super.getSource();
+        }
+
+        /**
+         * Checks if this event originated from the client side.
+         *
+         * @return <code>true</code> if the event originated from the client side,
+         *         <code>false</code> otherwise
+         */
+        public boolean isFromClient() {
+            return fromClient;
+        }
+
+        public JsonObject getTemplates() {
+            return templates;
+        }
+
+        public String getCssString() {
+            return cssString;
+        }
     }
 }
