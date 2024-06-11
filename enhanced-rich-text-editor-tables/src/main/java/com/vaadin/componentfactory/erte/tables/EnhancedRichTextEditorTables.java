@@ -64,13 +64,13 @@ public class EnhancedRichTextEditorTables {
         settingsButton.setEnabled(false);
 
         ToolbarSelectPopup selectPopup = new ToolbarSelectPopup(settingsButton);
-        selectPopup.addItem("Zeile oberhalb einfügen", event -> executeTableAction("append-row-above"));
-        selectPopup.addItem("Zeile unterhalb einfügen", event -> executeTableAction("append-row-below"));
-        selectPopup.addItem("Zeile entfernen", event -> executeTableAction("remove-row"));
+        selectPopup.addItem("Zeile oberhalb einfügen", event -> executeTableRowAction("append-row-above"));
+        selectPopup.addItem("Zeile unterhalb einfügen", event -> executeTableRowAction("append-row-below"));
+        selectPopup.addItem("Zeile entfernen", event -> executeTableRowAction("remove-row"));
         selectPopup.add(new Hr());
-        selectPopup.addItem("Spalte links einfügen", event -> executeTableAction("append-col-before"));
-        selectPopup.addItem("Spalte rechts einfügen", event -> executeTableAction("append-col-after"));
-        selectPopup.addItem("Spalte entfernen", event -> executeTableAction("remove-col"));
+        selectPopup.addItem("Spalte links einfügen", event -> executeTableColumnAction("append-col-before"));
+        selectPopup.addItem("Spalte rechts einfügen", event -> executeTableColumnAction("append-col-after"));
+        selectPopup.addItem("Spalte entfernen", event -> executeTableColumnAction("remove-col"));
 
         selectPopup.add(new Hr());
         MenuItem mergeCells = selectPopup.addItem("Zellen zusammenführen", event -> executeTableAction( "merge-selection"));
@@ -96,6 +96,9 @@ public class EnhancedRichTextEditorTables {
             stylesPopup.setActiveTemplate(event.getTemplate());
             if (event.getRowIndex() != null) {
                 stylesPopup.setSelectedRow(event.getRowIndex());
+            }
+            if (event.getColIndex() != null) {
+                stylesPopup.setSelectedColumn(event.getColIndex());
             }
         });
 
@@ -148,6 +151,16 @@ public class EnhancedRichTextEditorTables {
 
     public void executeTableAction(String action) {
         rte.getElement().executeJs(SCRIPTS_TABLE+ "action(this, $0)", action);
+    }
+
+    public void executeTableRowAction(String action) {
+        executeTableAction(action);
+        Notification.show("TBD check for row update");
+    }
+
+    public void executeTableColumnAction(String action) {
+        executeTableAction(action);
+        Notification.show("TBD check for col update");
     }
 
     private IntegerField createTableInsertNumberField(String placeholder, String tooltip) {
