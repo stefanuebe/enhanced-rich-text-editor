@@ -73,8 +73,8 @@ public class TemplateDialog extends ToolbarDialog {
         currentColFormPart = addPart(new CurrentColFormPart(), currentColDetails);
 
         Details fixedRowsDetails = addPartDetails("Sonderzeilen", false);
-        addPart(new FixedIndexRowFormPart("Kopfzeile", "1"), fixedRowsDetails);
-        addPart(new FixedIndexRowFormPart("Fußzeile", "1", true), fixedRowsDetails);
+        addPart(new FixedIndexRowFormPart("Kopfzeile", "0n+1"), fixedRowsDetails);
+        addPart(new FixedIndexRowFormPart("Fußzeile", "0n+1", true), fixedRowsDetails);
         addPart(new FixedIndexRowFormPart("Gerade Zeilen", "2n"), fixedRowsDetails);
         addPart(new FixedIndexRowFormPart("Ungerade Zeilen", "2n+1"), fixedRowsDetails);
         add(layout);
