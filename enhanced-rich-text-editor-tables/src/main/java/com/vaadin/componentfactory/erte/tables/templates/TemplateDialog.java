@@ -6,6 +6,7 @@ import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -36,7 +38,7 @@ import static com.vaadin.componentfactory.erte.tables.templates.TemplateJsonCons
 public class TemplateDialog extends ToolbarDialog {
 
     private final VerticalLayout layout;
-    private Select<String> templateField;
+    private ComboBox<String> templateField;
     private JsonObject currentTemplate;
     private JsonObject templates = Json.createObject();
     private CurrentRowFormPart currentRowFormPart;
@@ -90,19 +92,22 @@ public class TemplateDialog extends ToolbarDialog {
     }
 
     private void initTemplateSelection() {
-        templateField = new Select<>();
+        templateField = new ComboBox<>();
+        templateField.setLabel("Aktuelle Vorlage");
 
         TextField nameField = new TextField("Name");
+        nameField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
 
         Button createNewTemplate = initCreateTemplateButton();
         Button copySelectedTemplate = initCopySelectedTemplateButton();
         Button deleteSelectedTemplate = initDeleteSelectedTemplateButton();
         HorizontalLayout buttons = new HorizontalLayout(createNewTemplate, copySelectedTemplate, deleteSelectedTemplate);
 
-        HorizontalLayout templateContainer = new HorizontalLayout(templateField, buttons);
+        HorizontalLayout templateContainer = new HorizontalLayout(templateField, buttons, nameField);
         templateContainer.setAlignItems(FlexComponent.Alignment.BASELINE);
+        templateContainer.getStyle().set("flex-wrap", "wrap");
+        templateContainer.addClassNames("form-part");
         layout.add(templateContainer);
-        layout.add(nameField);
 
         Binder<JsonObject> nameBinder = new Binder<>();
         nameBinder.forField(nameField)
