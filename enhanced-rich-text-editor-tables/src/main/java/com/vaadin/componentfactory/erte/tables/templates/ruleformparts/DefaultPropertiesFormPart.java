@@ -1,4 +1,4 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;

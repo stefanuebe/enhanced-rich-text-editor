@@ -1,12 +1,12 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
-import com.vaadin.componentfactory.erte.tables.TemplateUtils;
+import com.vaadin.componentfactory.erte.tables.templates.TemplateParser;
 import com.vaadin.flow.data.binder.Binder;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
+import static com.vaadin.componentfactory.erte.tables.templates.TemplateJsonConstants.*;
 
 public abstract class AbstractIndexedFormPart extends DefaultPropertiesFormPart {
 
@@ -24,7 +24,7 @@ public abstract class AbstractIndexedFormPart extends DefaultPropertiesFormPart 
 
         String index = getSelectedIndex();
         boolean indexFromBottom = isIndexFromBottom();
-        JsonObject rowObject = TemplateUtils.searchForIndexedObject(array, index, indexFromBottom); // css nth child are 1 based
+        JsonObject rowObject = TemplateParser.searchForIndexedObject(array, index, indexFromBottom); // css nth child are 1 based
         JsonObject rowDeclarations;
         if (rowObject == null) {
             rowObject = Json.createObject();

@@ -1,9 +1,11 @@
-package com.vaadin.componentfactory.erte.tables.events;
+package com.vaadin.componentfactory.erte.tables;
 
-import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTables;
-import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTablesComponentEvent;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * This event is fired, when a table has been (de-) selected in an ERTE instance. Contains additional information,
+ * if the user uses "cell selection" and which template is applied to the selected table.
+ */
 public class TableSelectedEvent extends EnhancedRichTextEditorTablesComponentEvent {
     private final boolean selected;
 
@@ -28,10 +30,21 @@ public class TableSelectedEvent extends EnhancedRichTextEditorTablesComponentEve
         this.template = StringUtils.trimToNull(template);
     }
 
+    /**
+     * Is a table selected (normal cursor placement inside the table or cell selection)?
+     * @see #isCellSelectionActive()
+     * @return table is selected
+     */
     public boolean isSelected() {
         return selected;
     }
 
+    /**
+     * Indicates, if the user used cell selection for the current table. Cell selection means, that there is
+     * no active cursor inside the table, but the cells themselves have been selected (for instance to merge them).
+     * This information is mainly relevant for available operations on the current table.
+     * @return cell selection is active
+     */
     public boolean isCellSelectionActive() {
         return cellSelectionActive;
     }

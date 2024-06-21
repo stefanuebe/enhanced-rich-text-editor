@@ -1,10 +1,8 @@
-package com.vaadin.componentfactory.erte.tables.events;
+package com.vaadin.componentfactory.erte.tables;
 
-import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTables;
-import com.vaadin.componentfactory.erte.tables.EnhancedRichTextEditorTablesComponentEvent;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
-
+/**
+ * This event is fired, when the table cell indices change (including deselection).
+ */
 public class TableCellChangedEvent extends EnhancedRichTextEditorTablesComponentEvent {
     private final Integer rowIndex;
     private final Integer colIndex;
@@ -39,18 +37,34 @@ public class TableCellChangedEvent extends EnhancedRichTextEditorTablesComponent
         this.colIndex = colIndex;
     }
 
+    /**
+     * Returns the current column index (0-based). Returns null, if the table has been deselected.
+     * @return column index
+     */
     public Integer getColIndex() {
         return colIndex;
     }
 
+    /**
+     * Returns the current row index (0-based). Returns null, if the table has been deselected.
+     * @return row index
+     */
     public Integer getRowIndex() {
         return rowIndex;
     }
 
+    /**
+     * Returns the previous column index (0-based). Returns null, if no table had been selected before.
+     * @return old column index
+     */
     public Integer getOldColIndex() {
         return oldColIndex;
     }
 
+    /**
+     * Returns the previous row index (0-based). Returns null, if no table had been selected before.
+     * @return old row index
+     */
     public Integer getOldRowIndex() {
         return oldRowIndex;
     }

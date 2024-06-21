@@ -1,4 +1,4 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -12,11 +12,10 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import elemental.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.*;
+import static com.vaadin.componentfactory.erte.tables.templates.TemplateJsonConstants.*;
 
 public abstract class RuleFormPart extends VerticalLayout {
     private final Binder<JsonObject> binder;
@@ -137,7 +136,7 @@ public abstract class RuleFormPart extends VerticalLayout {
 
     public Registration addValueChangeListener(HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<?>> listener) {
         return binder.addValueChangeListener(event -> {
-            if (binder.isValid()) {
+            if (binder.validate().isOk()) {
                 listener.valueChanged(event);
             }
         });

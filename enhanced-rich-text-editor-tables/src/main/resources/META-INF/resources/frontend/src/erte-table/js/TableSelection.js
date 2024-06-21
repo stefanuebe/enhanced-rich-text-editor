@@ -103,6 +103,10 @@ class TableSelection {
   }
 
   static cellSelectionChange(quill, range = null, oldRange = null) {
+    //  Does currently not check for a table change, but col/row indices only.
+    //  In the current use cases, the table change should be catched already by the table selection event, but there
+    //  might be use cases in future, where an additionl check is necessary.
+
     const rte = TableTrick.getRichTextEditorInstance(quill);
     let selectedCell = quill.__selectedTableCell;
     let selectedRow = quill.__selectedTableRow;

@@ -1,4 +1,4 @@
-package com.vaadin.componentfactory.erte.tables;
+package com.vaadin.componentfactory.erte.tables.templates;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public final class TemplateConstants {
+/**
+ * Contains constants definitions for the template json.
+ */
+public final class TemplateJsonConstants {
     public static final String P_BACKGROUND = "bgColor";
     public static final String P_COLOR = "color";
     public static final String P_WIDTH = "width";

@@ -37,3 +37,16 @@ table.template1 > tr:nth-of-type(4) > td:nth-of-type(4) {
 table.template2 > tr:nth-of-type(2n) > td {
     background-color: whitesmoke;
 }
+
+table.template3 > tr > td {
+    border: 0 none transparent;
+}
+
+table.template3 > tr:nth-of-type(2n) > td {
+    background-color: whitesmoke;
+}
+
+table.template3 > tr:nth-of-type(1) > td {
+    background-color: gray;
+    color: white;
+}

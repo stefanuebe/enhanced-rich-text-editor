@@ -1,5 +1,6 @@
 package com.vaadin.componentfactory.erte.tables;
 
+import com.vaadin.componentfactory.erte.tables.templates.TemplateParser;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 import org.junit.Assert;

@@ -1,9 +1,9 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
 import com.vaadin.flow.data.binder.Binder;
 import elemental.json.JsonObject;
 
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.ROWS;
+import static com.vaadin.componentfactory.erte.tables.templates.TemplateJsonConstants.ROWS;
 
 public abstract class AbstractRowFormPart extends AbstractIndexedFormPart {
     private final String title;

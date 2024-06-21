@@ -5,9 +5,19 @@
             "color": "blue",
             "border": "0 none transparent"
         },
+        "cols": [
+            {
+                "index": "1",
+                "declarations": {
+                    "color": "#666",
+                    "bgColor": "lightgray",
+                    "width": "5rem"
+                }
+            }
+        ],
         "rows": [
             {
-                "index": "0n+1",
+                "index": "1",
                 "declarations" : {
                     "color": "white",
                     "bgColor": "#333"
@@ -19,21 +29,11 @@
                     "bgColor": "lightgray"
                 }
             },{
-                "index": "0n+1",
+                "index": "1",
                 "last": true,
                 "declarations" : {
                     "color": "white",
                     "bgColor": "#333"
-                }
-            }
-        ],
-        "cols": [
-            {
-                "index": "1",
-                "declarations": {
-                    "color": "#666",
-                    "bgColor": "lightgray",
-                    "width": "5rem"
                 }
             }
         ],
@@ -60,7 +60,7 @@
         "name": "Alternating Rows",
         "rows": [
             {
-                "index": "even",
+                "index": "2n",
                 "declarations" : {
                     "bgColor": "whitesmoke"
                 }
@@ -74,12 +74,12 @@
         },
         "rows": [
             {
-                "index": "even",
+                "index": "2n",
                 "declarations" : {
                     "bgColor": "whitesmoke"
                 }
             }, {
-                "index": "0n+1",
+                "index": "1",
                 "declarations" : {
                     "bgColor": "gray",
                     "color": "white"

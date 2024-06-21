@@ -1,6 +1,4 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
-
-import static com.vaadin.componentfactory.erte.tables.TemplateConstants.COLUMNS;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
 public class CurrentColFormPart extends AbstractColFormPart {
     private int selectedCol;

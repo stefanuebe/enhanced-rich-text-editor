@@ -1,10 +1,10 @@
 package com.vaadin.componentfactory.erte.tables;
 
 import com.vaadin.componentfactory.EnhancedRichTextEditor;
-import com.vaadin.componentfactory.erte.tables.events.TableCellChangedEvent;
-import com.vaadin.componentfactory.erte.tables.events.TableSelectedEvent;
-import com.vaadin.componentfactory.erte.tables.events.TemplateSelectedEvent;
-import com.vaadin.componentfactory.erte.tables.events.TemplatesChangedEvent;
+import com.vaadin.componentfactory.erte.tables.templates.TemplateSelectedEvent;
+import com.vaadin.componentfactory.erte.tables.templates.TemplatesChangedEvent;
+import com.vaadin.componentfactory.erte.tables.templates.TemplateDialog;
+import com.vaadin.componentfactory.erte.tables.templates.TemplateParser;
 import com.vaadin.componentfactory.toolbar.ToolbarPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSelectPopup;
 import com.vaadin.componentfactory.toolbar.ToolbarSwitch;
@@ -50,7 +50,7 @@ public class EnhancedRichTextEditorTables {
                             true,
                             eventData.getBoolean("event.detail.selected"),
                             eventData.getBoolean("event.detail.cellSelectionActive"),
-                            eventData.getString("event.detail.template")
+                            eventData.hasKey("event.detail.template") ? eventData.getString("event.detail.template") : null
                     ));
                 })
                 .addEventData("event.detail.selected")
@@ -168,20 +168,35 @@ public class EnhancedRichTextEditorTables {
         rte.addCustomToolbarComponents(insertButton, settingsButton, stylesButton);
     }
 
-    public void setTemplates(JsonObject jsonObject) {
-        // TODO allow setting of templates without enabled styles popup
-        Objects.requireNonNull(stylesPopup).setTemplates(jsonObject);
-        String cssString = TemplateParser.parse(jsonObject);
+    /**
+     * Sets the style templates to be used for this instance. These templates will be converted to css and
+     * applied to the client side to modify the tables' appearance.
+     * @param templates templates json object.
+     */
+    public void setTemplates(JsonObject templates) {
+        if (stylesPopup != null) {
+            stylesPopup.setTemplates(templates);
+        }
+        String cssString = TemplateParser.parse(templates);
         setClientSideStyles(cssString);
-        fireEvent(new TemplatesChangedEvent(this, false, jsonObject, cssString));
+        fireEvent(new TemplatesChangedEvent(this, false, templates, cssString));
     }
 
+    /**
+     * Returns the current templates. Only available when the style popup has been activated.
+     * @return templates json object or null
+     */
     public JsonObject getTemplates() {
-        return stylesPopup.getTemplates();
+        return stylesPopup != null ? stylesPopup.getTemplates() : null;
     }
 
+    /**
+     * Returns the current templates as a css string. Only available when the style popup has been activated.
+     * @return css string or null
+     */
     public String getTemplatesAsCssString() {
-        return TemplateParser.parse(getTemplates());
+        JsonObject templates = getTemplates();
+        return templates != null ? TemplateParser.parse(templates) : null;
     }
 
     /**

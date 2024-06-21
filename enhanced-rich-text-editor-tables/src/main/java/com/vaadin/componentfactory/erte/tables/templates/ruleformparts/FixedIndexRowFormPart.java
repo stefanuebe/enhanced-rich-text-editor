@@ -1,4 +1,4 @@
-package com.vaadin.componentfactory.erte.tables.ruleformparts;
+package com.vaadin.componentfactory.erte.tables.templates.ruleformparts;
 
 public class FixedIndexRowFormPart extends AbstractRowFormPart {
     private final String index;
